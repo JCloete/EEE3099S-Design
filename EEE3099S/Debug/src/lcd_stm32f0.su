@@ -1,0 +1,8 @@
+lcd_stm32f0.c:28:6:lcd_string	24	static
+lcd_stm32f0.c:35:6:lcd_two_line_write	16	static
+lcd_stm32f0.c:44:6:lcd_init	8	static
+lcd_stm32f0.c:71:6:lcd_command	16	static
+lcd_stm32f0.c:80:6:lcd_put	16	static
+lcd_stm32f0.c:139:13:delay	24	static
+lcd_stm32f0.c:149:13:pulse_strobe	8	static
+lcd_stm32f0.c:162:6:lcd_num	16	static
