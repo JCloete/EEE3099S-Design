@@ -30,6 +30,7 @@ SOFTWARE.
 /* Includes */
 #include "stm32f0xx.h"
 
+// Declare private functions
 
 void init_timer6(void);
 void TIM6_IRQHandler(void);
@@ -39,17 +40,17 @@ void CountDown();
 void init_buttons();
 void init_EXTI(void);
 void EXTI0_1_IRQHandler(void);
-void init_pwm(void);
-void init_adc(void);
-void run_adc(void);
+void init_PWM(void);
+void init_ADC(void);
+void run_ADC(void);
 
 // Declare global variables
 
 char value = 0;
 char flag = 0;
 char ADC_value = 0;
-float duty = 0.0;
-char rduty = 0;
+float fduty = 0.0;
+char duty = 0;
 
 /**
 **===========================================================================
@@ -67,25 +68,29 @@ int main(void)
 	init_timer6();
 	init_LED();
 	init_buttons();
-	init_EXTI();
-	init_pwm();
-	init_adc();
+	init_EXTI();	// Note that enabling the ADC turns off the EXTI interrupt for PA2.
+	init_PWM();
+	init_ADC();		// Turn off ADC before trying to trigger PA2 interrupt
 
 	while(1)
 	{
-		run_adc();
-		duty = (ADC_value/(255.0) * 100.0); //((ADC_value / 255) * 100);
-		rduty = (int)duty;
 
-		TIM2->CCR3 =  rduty* 40;
-		TIM2->CCR4 = (100-rduty) * 40;
+		run_ADC();
+
+		fduty = (ADC_value/(255.0) * 100.0); //((ADC_value / 255) * 100);
+		duty = (int)fduty;
+
+		// Duty cycle switches between red and green by POT 0
+		TIM2->CCR3 =  duty* 40;
+		TIM2->CCR4 = (100-duty) * 40;
+
 	}
 }
 
 
 // Function definitions
 
-void run_adc(void)
+void run_ADC(void)
 {
 	ADC1 -> CR |= ADC_CR_ADSTART;
 	while((ADC1->ISR & ADC_ISR_EOC) == 0);
@@ -93,7 +98,8 @@ void run_adc(void)
 	ADC_value = ADC1->DR;
 }
 
-void init_adc(void)
+// Code enables PA5 - POT0.
+void init_ADC(void)
 {
 	RCC -> AHBENR |= RCC_AHBENR_GPIOAEN;
 	GPIOA -> MODER |= GPIO_MODER_MODER5;
@@ -125,7 +131,8 @@ void ResetClockTo48Mhz(void)									   //COMPULSORY
 	while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);		   //COMPULSORY
 }
 
-void init_pwm(void)
+// Initiates PWM for LED's on D9
+void init_PWM(void)
 {
 	RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
 	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
@@ -235,18 +242,5 @@ void CountUp()
     else                                // If value is not 255 then add 1 to the value
     {
         value += 1;
-    }
-}
-
-void CountDown()
-{
-    GPIOB->ODR = value;                 // Display the current value on the LED's
-    if(value == 0)                      // Check whether the value is at 0 and if it is at 0 then reset it to 255
-    {
-        value = 255;
-    }
-    else                                // If value is not 0 then add -1 to the value
-    {
-        value -= 1;
     }
 }

@@ -21,23 +21,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
   8 .ARM.attributes 00000028  00000000  00000000  000115c4  2**0
                   CONTENTS, READONLY
-  9 .debug_info   00000b2b  00000000  00000000  000115ec  2**0
+  9 .debug_info   00000b09  00000000  00000000  000115ec  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_abbrev 000002bc  00000000  00000000  00012117  2**0
+ 10 .debug_abbrev 000002bc  00000000  00000000  000120f5  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_aranges 000000d8  00000000  00000000  000123d8  2**3
+ 11 .debug_aranges 000000d0  00000000  00000000  000123b8  2**3
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 000000b0  00000000  00000000  000124b0  2**3
+ 12 .debug_ranges 000000a8  00000000  00000000  00012488  2**3
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_line   0000056a  00000000  00000000  00012560  2**0
+ 13 .debug_line   00000554  00000000  00000000  00012530  2**0
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_str    000005f2  00000000  00000000  00012aca  2**0
+ 14 .debug_str    000005d7  00000000  00000000  00012a84  2**0
                   CONTENTS, READONLY, DEBUGGING
- 15 .comment      0000007c  00000000  00000000  000130bc  2**0
+ 15 .comment      0000007c  00000000  00000000  0001305b  2**0
                   CONTENTS, READONLY
- 16 .debug_frame  0000032c  00000000  00000000  00013138  2**2
+ 16 .debug_frame  00000310  00000000  00000000  000130d8  2**2
                   CONTENTS, READONLY, DEBUGGING
- 17 .stabstr      0000003f  00000000  00000000  00013464  2**0
+ 17 .stabstr      0000003f  00000000  00000000  000133e8  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -1961,18 +1961,20 @@ int main(void)
  8000fd0:	f000 f9e2 	bl	8001398 <init_LED>
 	init_buttons();
  8000fd4:	f000 f94c 	bl	8001270 <init_buttons>
-	init_EXTI();
+	init_EXTI();	// Note that enabling the ADC turns off the EXTI interrupt for PA2.
  8000fd8:	f000 f918 	bl	800120c <init_EXTI>
-	init_pwm();
- 8000fdc:	f000 f8a8 	bl	8001130 <init_pwm>
-	init_adc();
- 8000fe0:	f000 f860 	bl	80010a4 <init_adc>
+	init_PWM();
+ 8000fdc:	f000 f8a8 	bl	8001130 <init_PWM>
+	init_ADC();		// Turn off ADC before trying to trigger PA2 interrupt
+ 8000fe0:	f000 f860 	bl	80010a4 <init_ADC>
 
 	while(1)
 	{
-		run_adc();
- 8000fe4:	f000 f844 	bl	8001070 <run_adc>
-		duty = (ADC_value/(255.0) * 100.0); //((ADC_value / 255) * 100);
+
+		run_ADC();
+ 8000fe4:	f000 f844 	bl	8001070 <run_ADC>
+
+		fduty = (ADC_value/(255.0) * 100.0); //((ADC_value / 255) * 100);
  8000fe8:	4b1c      	ldr	r3, [pc, #112]	; (800105c <main+0x94>)
  8000fea:	781b      	ldrb	r3, [r3, #0]
  8000fec:	0018      	movs	r0, r3
@@ -1995,7 +1997,7 @@ int main(void)
  8001016:	1c02      	adds	r2, r0, #0
  8001018:	4b13      	ldr	r3, [pc, #76]	; (8001068 <main+0xa0>)
  800101a:	601a      	str	r2, [r3, #0]
-		rduty = (int)duty;
+		duty = (int)fduty;
  800101c:	4b12      	ldr	r3, [pc, #72]	; (8001068 <main+0xa0>)
  800101e:	681b      	ldr	r3, [r3, #0]
  8001020:	1c18      	adds	r0, r3, #0
@@ -2005,7 +2007,8 @@ int main(void)
  800102a:	4b10      	ldr	r3, [pc, #64]	; (800106c <main+0xa4>)
  800102c:	701a      	strb	r2, [r3, #0]
 
-		TIM2->CCR3 =  rduty* 40;
+		// Duty cycle switches between red and green by POT 0
+		TIM2->CCR3 =  duty* 40;
  800102e:	2380      	movs	r3, #128	; 0x80
  8001030:	05da      	lsls	r2, r3, #23
  8001032:	4b0e      	ldr	r3, [pc, #56]	; (800106c <main+0xa4>)
@@ -2016,7 +2019,7 @@ int main(void)
  800103c:	185b      	adds	r3, r3, r1
  800103e:	00db      	lsls	r3, r3, #3
  8001040:	63d3      	str	r3, [r2, #60]	; 0x3c
-		TIM2->CCR4 = (100-rduty) * 40;
+		TIM2->CCR4 = (100-duty) * 40;
  8001042:	2380      	movs	r3, #128	; 0x80
  8001044:	05da      	lsls	r2, r3, #23
  8001046:	4b09      	ldr	r3, [pc, #36]	; (800106c <main+0xa4>)
@@ -2029,7 +2032,7 @@ int main(void)
  8001054:	185b      	adds	r3, r3, r1
  8001056:	00db      	lsls	r3, r3, #3
  8001058:	6413      	str	r3, [r2, #64]	; 0x40
-		run_adc();
+		run_ADC();
  800105a:	e7c3      	b.n	8000fe4 <main+0x1c>
  800105c:	2000001e 	.word	0x2000001e
  8001060:	406fe000 	.word	0x406fe000
@@ -2037,35 +2040,35 @@ int main(void)
  8001068:	20000020 	.word	0x20000020
  800106c:	20000024 	.word	0x20000024
 
-08001070 <run_adc>:
+08001070 <run_ADC>:
 
 
 // Function definitions
 
-void run_adc(void)
+void run_ADC(void)
 {
  8001070:	b580      	push	{r7, lr}
  8001072:	af00      	add	r7, sp, #0
 	ADC1 -> CR |= ADC_CR_ADSTART;
- 8001074:	4b09      	ldr	r3, [pc, #36]	; (800109c <run_adc+0x2c>)
- 8001076:	4a09      	ldr	r2, [pc, #36]	; (800109c <run_adc+0x2c>)
+ 8001074:	4b09      	ldr	r3, [pc, #36]	; (800109c <run_ADC+0x2c>)
+ 8001076:	4a09      	ldr	r2, [pc, #36]	; (800109c <run_ADC+0x2c>)
  8001078:	6892      	ldr	r2, [r2, #8]
  800107a:	2104      	movs	r1, #4
  800107c:	430a      	orrs	r2, r1
  800107e:	609a      	str	r2, [r3, #8]
 	while((ADC1->ISR & ADC_ISR_EOC) == 0);
  8001080:	46c0      	nop			; (mov r8, r8)
- 8001082:	4b06      	ldr	r3, [pc, #24]	; (800109c <run_adc+0x2c>)
+ 8001082:	4b06      	ldr	r3, [pc, #24]	; (800109c <run_ADC+0x2c>)
  8001084:	681b      	ldr	r3, [r3, #0]
  8001086:	2204      	movs	r2, #4
  8001088:	4013      	ands	r3, r2
- 800108a:	d0fa      	beq.n	8001082 <run_adc+0x12>
+ 800108a:	d0fa      	beq.n	8001082 <run_ADC+0x12>
 
 	ADC_value = ADC1->DR;
- 800108c:	4b03      	ldr	r3, [pc, #12]	; (800109c <run_adc+0x2c>)
+ 800108c:	4b03      	ldr	r3, [pc, #12]	; (800109c <run_ADC+0x2c>)
  800108e:	6c1b      	ldr	r3, [r3, #64]	; 0x40
  8001090:	b2da      	uxtb	r2, r3
- 8001092:	4b03      	ldr	r3, [pc, #12]	; (80010a0 <run_adc+0x30>)
+ 8001092:	4b03      	ldr	r3, [pc, #12]	; (80010a0 <run_ADC+0x30>)
  8001094:	701a      	strb	r2, [r3, #0]
 }
  8001096:	46c0      	nop			; (mov r8, r8)
@@ -2074,15 +2077,16 @@ void run_adc(void)
  800109c:	40012400 	.word	0x40012400
  80010a0:	2000001e 	.word	0x2000001e
 
-080010a4 <init_adc>:
+080010a4 <init_ADC>:
 
-void init_adc(void)
+// Code enables PA5 - POT0.
+void init_ADC(void)
 {
  80010a4:	b580      	push	{r7, lr}
  80010a6:	af00      	add	r7, sp, #0
 	RCC -> AHBENR |= RCC_AHBENR_GPIOAEN;
- 80010a8:	4b1e      	ldr	r3, [pc, #120]	; (8001124 <init_adc+0x80>)
- 80010aa:	4a1e      	ldr	r2, [pc, #120]	; (8001124 <init_adc+0x80>)
+ 80010a8:	4b1e      	ldr	r3, [pc, #120]	; (8001124 <init_ADC+0x80>)
+ 80010aa:	4a1e      	ldr	r2, [pc, #120]	; (8001124 <init_ADC+0x80>)
  80010ac:	6952      	ldr	r2, [r2, #20]
  80010ae:	2180      	movs	r1, #128	; 0x80
  80010b0:	0289      	lsls	r1, r1, #10
@@ -2099,8 +2103,8 @@ void init_adc(void)
  80010c4:	430a      	orrs	r2, r1
  80010c6:	601a      	str	r2, [r3, #0]
 	RCC -> APB2ENR |= RCC_APB2ENR_ADCEN;
- 80010c8:	4b16      	ldr	r3, [pc, #88]	; (8001124 <init_adc+0x80>)
- 80010ca:	4a16      	ldr	r2, [pc, #88]	; (8001124 <init_adc+0x80>)
+ 80010c8:	4b16      	ldr	r3, [pc, #88]	; (8001124 <init_ADC+0x80>)
+ 80010ca:	4a16      	ldr	r2, [pc, #88]	; (8001124 <init_ADC+0x80>)
  80010cc:	6992      	ldr	r2, [r2, #24]
  80010ce:	2180      	movs	r1, #128	; 0x80
  80010d0:	0089      	lsls	r1, r1, #2
@@ -2108,48 +2112,48 @@ void init_adc(void)
  80010d4:	619a      	str	r2, [r3, #24]
 
 	ADC1 -> CFGR1 |= ADC_CFGR1_RES_1;
- 80010d6:	4b14      	ldr	r3, [pc, #80]	; (8001128 <init_adc+0x84>)
- 80010d8:	4a13      	ldr	r2, [pc, #76]	; (8001128 <init_adc+0x84>)
+ 80010d6:	4b14      	ldr	r3, [pc, #80]	; (8001128 <init_ADC+0x84>)
+ 80010d8:	4a13      	ldr	r2, [pc, #76]	; (8001128 <init_ADC+0x84>)
  80010da:	68d2      	ldr	r2, [r2, #12]
  80010dc:	2110      	movs	r1, #16
  80010de:	430a      	orrs	r2, r1
  80010e0:	60da      	str	r2, [r3, #12]
 	ADC1 -> CFGR1 &= ~ADC_CFGR1_ALIGN;
- 80010e2:	4b11      	ldr	r3, [pc, #68]	; (8001128 <init_adc+0x84>)
- 80010e4:	4a10      	ldr	r2, [pc, #64]	; (8001128 <init_adc+0x84>)
+ 80010e2:	4b11      	ldr	r3, [pc, #68]	; (8001128 <init_ADC+0x84>)
+ 80010e4:	4a10      	ldr	r2, [pc, #64]	; (8001128 <init_ADC+0x84>)
  80010e6:	68d2      	ldr	r2, [r2, #12]
  80010e8:	2120      	movs	r1, #32
  80010ea:	438a      	bics	r2, r1
  80010ec:	60da      	str	r2, [r3, #12]
 	ADC1 -> CFGR1 &= ~ADC_CFGR1_CONT;
- 80010ee:	4b0e      	ldr	r3, [pc, #56]	; (8001128 <init_adc+0x84>)
- 80010f0:	4a0d      	ldr	r2, [pc, #52]	; (8001128 <init_adc+0x84>)
+ 80010ee:	4b0e      	ldr	r3, [pc, #56]	; (8001128 <init_ADC+0x84>)
+ 80010f0:	4a0d      	ldr	r2, [pc, #52]	; (8001128 <init_ADC+0x84>)
  80010f2:	68d2      	ldr	r2, [r2, #12]
- 80010f4:	490d      	ldr	r1, [pc, #52]	; (800112c <init_adc+0x88>)
+ 80010f4:	490d      	ldr	r1, [pc, #52]	; (800112c <init_ADC+0x88>)
  80010f6:	400a      	ands	r2, r1
  80010f8:	60da      	str	r2, [r3, #12]
 	ADC1 -> CHSELR |= ADC_CHSELR_CHSEL5;
- 80010fa:	4b0b      	ldr	r3, [pc, #44]	; (8001128 <init_adc+0x84>)
- 80010fc:	4a0a      	ldr	r2, [pc, #40]	; (8001128 <init_adc+0x84>)
+ 80010fa:	4b0b      	ldr	r3, [pc, #44]	; (8001128 <init_ADC+0x84>)
+ 80010fc:	4a0a      	ldr	r2, [pc, #40]	; (8001128 <init_ADC+0x84>)
  80010fe:	6a92      	ldr	r2, [r2, #40]	; 0x28
  8001100:	2120      	movs	r1, #32
  8001102:	430a      	orrs	r2, r1
  8001104:	629a      	str	r2, [r3, #40]	; 0x28
 
 	ADC1 -> CR |= ADC_CR_ADEN;
- 8001106:	4b08      	ldr	r3, [pc, #32]	; (8001128 <init_adc+0x84>)
- 8001108:	4a07      	ldr	r2, [pc, #28]	; (8001128 <init_adc+0x84>)
+ 8001106:	4b08      	ldr	r3, [pc, #32]	; (8001128 <init_ADC+0x84>)
+ 8001108:	4a07      	ldr	r2, [pc, #28]	; (8001128 <init_ADC+0x84>)
  800110a:	6892      	ldr	r2, [r2, #8]
  800110c:	2101      	movs	r1, #1
  800110e:	430a      	orrs	r2, r1
  8001110:	609a      	str	r2, [r3, #8]
 	while((ADC1->ISR & ADC_ISR_ADRDY) == 0);
  8001112:	46c0      	nop			; (mov r8, r8)
- 8001114:	4b04      	ldr	r3, [pc, #16]	; (8001128 <init_adc+0x84>)
+ 8001114:	4b04      	ldr	r3, [pc, #16]	; (8001128 <init_ADC+0x84>)
  8001116:	681b      	ldr	r3, [r3, #0]
  8001118:	2201      	movs	r2, #1
  800111a:	4013      	ands	r3, r2
- 800111c:	d0fa      	beq.n	8001114 <init_adc+0x70>
+ 800111c:	d0fa      	beq.n	8001114 <init_ADC+0x70>
 }
  800111e:	46c0      	nop			; (mov r8, r8)
  8001120:	46bd      	mov	sp, r7
@@ -2158,57 +2162,57 @@ void init_adc(void)
  8001128:	40012400 	.word	0x40012400
  800112c:	ffffdfff 	.word	0xffffdfff
 
-08001130 <init_pwm>:
-	RCC->CFGR |= (uint32_t) (RCC_CFGR_SW_PLL);					   //COMPULSORY
+08001130 <init_PWM>:
 	while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);		   //COMPULSORY
 }
 
-void init_pwm(void)
+// Initiates PWM for LED's on D9
+void init_PWM(void)
 {
  8001130:	b580      	push	{r7, lr}
  8001132:	af00      	add	r7, sp, #0
 	RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
- 8001134:	4b32      	ldr	r3, [pc, #200]	; (8001200 <init_pwm+0xd0>)
- 8001136:	4a32      	ldr	r2, [pc, #200]	; (8001200 <init_pwm+0xd0>)
+ 8001134:	4b32      	ldr	r3, [pc, #200]	; (8001200 <init_PWM+0xd0>)
+ 8001136:	4a32      	ldr	r2, [pc, #200]	; (8001200 <init_PWM+0xd0>)
  8001138:	6952      	ldr	r2, [r2, #20]
  800113a:	2180      	movs	r1, #128	; 0x80
  800113c:	02c9      	lsls	r1, r1, #11
  800113e:	430a      	orrs	r2, r1
  8001140:	615a      	str	r2, [r3, #20]
 	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
- 8001142:	4b2f      	ldr	r3, [pc, #188]	; (8001200 <init_pwm+0xd0>)
- 8001144:	4a2e      	ldr	r2, [pc, #184]	; (8001200 <init_pwm+0xd0>)
+ 8001142:	4b2f      	ldr	r3, [pc, #188]	; (8001200 <init_PWM+0xd0>)
+ 8001144:	4a2e      	ldr	r2, [pc, #184]	; (8001200 <init_PWM+0xd0>)
  8001146:	69d2      	ldr	r2, [r2, #28]
  8001148:	2101      	movs	r1, #1
  800114a:	430a      	orrs	r2, r1
  800114c:	61da      	str	r2, [r3, #28]
 	GPIOB->MODER |= GPIO_MODER_MODER10_1;
- 800114e:	4b2d      	ldr	r3, [pc, #180]	; (8001204 <init_pwm+0xd4>)
- 8001150:	4a2c      	ldr	r2, [pc, #176]	; (8001204 <init_pwm+0xd4>)
+ 800114e:	4b2d      	ldr	r3, [pc, #180]	; (8001204 <init_PWM+0xd4>)
+ 8001150:	4a2c      	ldr	r2, [pc, #176]	; (8001204 <init_PWM+0xd4>)
  8001152:	6812      	ldr	r2, [r2, #0]
  8001154:	2180      	movs	r1, #128	; 0x80
  8001156:	0389      	lsls	r1, r1, #14
  8001158:	430a      	orrs	r2, r1
  800115a:	601a      	str	r2, [r3, #0]
 	GPIOB->MODER |= GPIO_MODER_MODER11_1;
- 800115c:	4b29      	ldr	r3, [pc, #164]	; (8001204 <init_pwm+0xd4>)
- 800115e:	4a29      	ldr	r2, [pc, #164]	; (8001204 <init_pwm+0xd4>)
+ 800115c:	4b29      	ldr	r3, [pc, #164]	; (8001204 <init_PWM+0xd4>)
+ 800115e:	4a29      	ldr	r2, [pc, #164]	; (8001204 <init_PWM+0xd4>)
  8001160:	6812      	ldr	r2, [r2, #0]
  8001162:	2180      	movs	r1, #128	; 0x80
  8001164:	0409      	lsls	r1, r1, #16
  8001166:	430a      	orrs	r2, r1
  8001168:	601a      	str	r2, [r3, #0]
 	GPIOB->AFR[1] |= (2 << (4*(10-8)));
- 800116a:	4b26      	ldr	r3, [pc, #152]	; (8001204 <init_pwm+0xd4>)
- 800116c:	4a25      	ldr	r2, [pc, #148]	; (8001204 <init_pwm+0xd4>)
+ 800116a:	4b26      	ldr	r3, [pc, #152]	; (8001204 <init_PWM+0xd4>)
+ 800116c:	4a25      	ldr	r2, [pc, #148]	; (8001204 <init_PWM+0xd4>)
  800116e:	6a52      	ldr	r2, [r2, #36]	; 0x24
  8001170:	2180      	movs	r1, #128	; 0x80
  8001172:	0089      	lsls	r1, r1, #2
  8001174:	430a      	orrs	r2, r1
  8001176:	625a      	str	r2, [r3, #36]	; 0x24
 	GPIOB->AFR[1] |= (2 << (4*(11-8)));
- 8001178:	4b22      	ldr	r3, [pc, #136]	; (8001204 <init_pwm+0xd4>)
- 800117a:	4a22      	ldr	r2, [pc, #136]	; (8001204 <init_pwm+0xd4>)
+ 8001178:	4b22      	ldr	r3, [pc, #136]	; (8001204 <init_PWM+0xd4>)
+ 800117a:	4a22      	ldr	r2, [pc, #136]	; (8001204 <init_PWM+0xd4>)
  800117c:	6a52      	ldr	r2, [r2, #36]	; 0x24
  800117e:	2180      	movs	r1, #128	; 0x80
  8001180:	0189      	lsls	r1, r1, #6
@@ -2218,7 +2222,7 @@ void init_pwm(void)
 	TIM2->ARR=3999;
  8001186:	2380      	movs	r3, #128	; 0x80
  8001188:	05db      	lsls	r3, r3, #23
- 800118a:	4a1f      	ldr	r2, [pc, #124]	; (8001208 <init_pwm+0xd8>)
+ 800118a:	4a1f      	ldr	r2, [pc, #124]	; (8001208 <init_PWM+0xd8>)
  800118c:	62da      	str	r2, [r3, #44]	; 0x2c
 	TIM2->CCMR2 |= (TIM_CCMR2_OC3M_2|TIM_CCMR2_OC3M_1);
  800118e:	2380      	movs	r3, #128	; 0x80
