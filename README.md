@@ -5,6 +5,8 @@
 
 2) If .cproject and .project files are still there. Open the project in Atollic by opening the .cproject file directly by clicking on it in the windows file browser.
 
+3) Or just try import project normally but it gets weird sometimes so \o/ "do this at own risk"
+
 Code for all aspects of the EEE3099S-Design Project for Group 2
 
 CLTJAS004
