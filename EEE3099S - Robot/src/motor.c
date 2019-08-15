@@ -19,7 +19,26 @@
 #include "motor.h"
 
 //***
+// amount should be between 0 and 100
 void forward(int amount)
 {
     // Add in a command that makes PWM move robot forward by a proportional amount
+}
+
+// Use this for braking i think
+// amount should be between 0 and 100
+void backwards(int amount)
+{
+	// Add in PWM commands that move motors backwards
+}
+
+// Use defines LEFT or RIGHT to turn 90 degrees left or right
+void turn(int amount)
+{
+	// Add in a command to turn robot 90 degrees left or right then stop
+}
+
+void turnAround(void)
+{
+	// Add in a command to turn robot 180 degrees then stop
 }
