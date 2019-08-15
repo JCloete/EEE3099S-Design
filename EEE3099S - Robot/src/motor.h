@@ -4,7 +4,7 @@
  *  Created on: Aug 15, 2019
  *      Author: Jason Cloete
  *
- *  Libary of all motor functions to be used in robot.
+ *  Library of all motor functions to be used in robot.
  */
 
 #ifndef MOTOR_H_
