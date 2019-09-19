@@ -17,6 +17,7 @@
 #include "stm32f0xx.h"
 #include <stdio.h>
 #include "motor.h"
+#include "logic.h"
 
 //***
 // amount should be between 0 and 100
@@ -32,10 +33,49 @@ void backwards(int amount)
 	// Add in PWM commands that move motors backwards
 }
 
+// Use defines LEFT or RIGHT to make minor adjustments
+void correctPath(char direction)
+{
+	switch (direction)
+	{
+	case LEFT:
+		// PWM Code to make it turn the robot left
+
+		break;
+
+	case STRAIGHT:
+		// PWM code to make it go straight
+		break;
+
+	case RIGHT:
+		// PWM code to make it go right
+		break;
+	}
+}
+
 // Use defines LEFT or RIGHT to turn 90 degrees left or right
-void turn(int amount)
+void turn(char direction)
 {
 	// Add in a command to turn robot 90 degrees left or right then stop
+	switch (direction)
+	{
+	case LEFT:
+		// Add in PWM commands to turn LEFT
+		break;
+
+	case STRAIGHT:
+		// Add in PWM commands to turn straight
+		break;
+
+	case RIGHT:
+		// Add in PWM commands to turn in a direction
+		break;
+
+	default:
+		printf("Not a valid direction");
+	}
+
+
 }
 
 void turnAround(void)

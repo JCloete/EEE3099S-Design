@@ -12,19 +12,20 @@
 
 // Just setting up some templates of what i think will be useful.
 // Will add more as necessary
-void forward(int amount);
-void backwards(int amount);
+void forward(void);
+void backwards(void);
+void stop(void);
 
-void turn(int amount);
+void correctPath(char direction);
+void turn(char direction);
 void turnAround(void);
 
 // Defines
 // Defining some common commands we could use (DEFAULT VALUES. CHANGE ONCE TESTING MOTOR and PWM)
-#define FULL 2
-#define HALF 1
-#define NONE 0
 
-#define LEFT 1
-#define RIGHT 1
+#define LEFT 0
+#define STRAIGHT 1
+#define RIGHT 2
+
 
 #endif /* MOTOR_H_ */

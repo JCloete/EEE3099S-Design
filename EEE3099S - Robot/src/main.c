@@ -28,8 +28,8 @@ SOFTWARE.
 */
 
 /* Includes */
+#include <stdio.h>
 #include "robot.h"
-#include "motor.h"
 #include "logic.h"
 
 /* Private macro */
@@ -46,5 +46,11 @@ SOFTWARE.
 */
 int main(void)
 {
-	// Empty for now
+	printf("Starting test!");
+	while (1)
+	{
+		followLine();
+		printf("Test Loop 1");
+	}
+	printf("Finished Test!");
 }
