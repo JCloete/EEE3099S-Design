@@ -30,6 +30,7 @@ SOFTWARE.
 /* Includes */
 #include "robot.h"
 #include "motor.h"
+#include "logic.h"
 
 /* Private macro */
 /* Private variables */
