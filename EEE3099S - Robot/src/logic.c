@@ -208,6 +208,7 @@ void makeTurn(char direction)
 			printf("Not a valid direction");
 		}
 
+		while(sensors[2] == 1); // Wait for the sensor to get off original path and move into transition mode (Otherwise below line executes immediately)
 		while(sensors[2] != 1); // Constantly check for if turn is completed
 		turn(STRAIGHT);
 		state = 1;
