@@ -21,16 +21,21 @@
 
 //***
 // amount should be between 0 and 100
-void forward(int amount)
+void forward(void)
 {
     // Add in a command that makes PWM move robot forward by a proportional amount
 }
 
 // Use this for braking i think
 // amount should be between 0 and 100
-void backwards(int amount)
+void backwards(void)
 {
 	// Add in PWM commands that move motors backwards
+}
+
+void stop(void)
+{
+	// PWM commands to make robot stop
 }
 
 // Use defines LEFT or RIGHT to make minor adjustments
@@ -40,15 +45,17 @@ void correctPath(char direction)
 	{
 	case LEFT:
 		// PWM Code to make it turn the robot left
-
+		asm("nop");
 		break;
 
 	case STRAIGHT:
 		// PWM code to make it go straight
+		asm("nop");
 		break;
 
 	case RIGHT:
 		// PWM code to make it go right
+		asm("nop");
 		break;
 	}
 }

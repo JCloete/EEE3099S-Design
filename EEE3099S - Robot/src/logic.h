@@ -10,22 +10,29 @@
 
 // ******* Global Variables ********
 
-//// This states whether a sensor is detecting something or not
+// This states whether a sensor is detecting something or not
 extern char sensors[5];
 
 // Logic state robot is in
 extern char state;
-extern signed char error;
-signed char pastError;
+extern char error;
+extern char pastError;
+
+// Stores all Path information
+extern char path[10][100][2];
+extern char attempt;
+extern char turnNum;
 
 // ******* Functions ********
 void followLine();
 void checkIntersection();
 
-void makeCorrections(signed char error);
+void makeCorrections(char error);
 void makeTurn(char direction);
 
 void delay(int delay);
+
+void addInfo(char intersection);
 
 // char equalArrays(char arr1, char arr2);
 

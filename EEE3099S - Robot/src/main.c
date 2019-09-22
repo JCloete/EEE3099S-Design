@@ -44,13 +44,16 @@ SOFTWARE.
 **
 **===========================================================================
 */
+
+// Use main to implement all button presses and the like
+
 int main(void)
 {
-	printf("Starting test!");
+	int i = 0;
 	while (1)
 	{
+		asm("nop");
 		followLine();
-		printf("Test Loop 1");
+		i++;
 	}
-	printf("Finished Test!");
 }
