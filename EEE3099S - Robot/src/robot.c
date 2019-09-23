@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include "robot.h"
 
-// ***
+/* ** Probably not using ADC's but leaving this here just in case something changes
 void init_ADC(void)
 {
 	// Temporary code storage
@@ -47,9 +47,10 @@ void run_ADC(void)
 
 	//ADC_value = ADC1->DR;
 }
+*/
 
 // ***
-// No idea how this code works. Figure it out sometime
+// No idea how this code works. Figure it out sometime. Perhaps reuse this to make a flashing LED. The Timer interrupt part not the PWM
 void init_PWM(void)
 {
 	RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
