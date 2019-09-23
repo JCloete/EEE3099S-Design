@@ -24,6 +24,8 @@
 void forward(void)
 {
     // Add in a command that makes PWM move robot forward by a proportional amount
+	GPIOB->ODR |= GPIO_ODR_3;
+	GPIOB->ODR &= ~GPIO_ODR_4;
 }
 
 // Use this for braking i think
@@ -31,11 +33,15 @@ void forward(void)
 void backwards(void)
 {
 	// Add in PWM commands that move motors backwards
+	GPIOB->ODR &= ~GPIO_ODR_3;
+	GPIOB->ODR |= GPIO_ODR_4;
 }
 
 void stop(void)
 {
 	// PWM commands to make robot stop
+	GPIOB->ODR &= ~GPIO_ODR_3;
+	GPIOB->ODR &= ~GPIO_ODR_4;
 }
 
 // Use defines LEFT or RIGHT to make minor adjustments

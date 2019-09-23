@@ -84,8 +84,8 @@ void init_EXTI()
 }
 
 // ***
-// Does what it says. Probably used for the two buttons to start stop robot.
-void init_buttons()
+// Sets all inputs for buttons and sensors probably
+void init_inputs()
 {
 	// Init buttons
 	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
@@ -100,11 +100,13 @@ void init_buttons()
 }
 
 // ***
-// Actual values are going to change because not on STM32F051C6 UCT Devboard
-void init_LED()
+// These pins set motor highs and LED highs
+void init_outputs()
 {
     //Initialize the LED's to be used to output data
 
-    RCC  ->AHBENR |= 1<<18;             // Connecting GPIO Port B to the clock through the bus using bit 18
+    RCC  ->AHBENR |= RCC_AHBENR_GPIOBEN;             // Connecting GPIO Port B to the clock through the bus using bit 18
     GPIOB->MODER  |= 0x00005555;        // Setting modes of the LED's to outputs
+
+    GPIOB->ODR |= GPIO_ODR_2; // Turn enable 1 on
 }

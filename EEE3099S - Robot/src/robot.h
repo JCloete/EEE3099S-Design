@@ -15,8 +15,8 @@
 // void init_ADC(void);
 void init_PWM(void);
 void init_EXTI(void);
-void init_Buttons(void);
-void init_LED(void);
+void init_inits(void);
+void init_outputs(void);
 
 // Run commands
 // void run_ADC(void);
