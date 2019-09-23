@@ -51,15 +51,16 @@ SOFTWARE.
 int main(void)
 {
 	init_outputs();
+	init_buttonPress();
 
 	int i = 0;
 	while (1)
 	{
 		asm("nop");
-		forward();
+		//forward();
 		//delay(20);
-		stop();
-		backwards();
+		//stop();
+		//backwards();
 		i++;
 	}
 }

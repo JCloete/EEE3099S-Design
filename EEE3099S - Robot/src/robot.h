@@ -17,6 +17,7 @@ void init_PWM(void);
 void init_EXTI(void);
 void init_inits(void);
 void init_outputs(void);
+void init_buttonPress(void);
 
 // Run commands
 // void run_ADC(void);

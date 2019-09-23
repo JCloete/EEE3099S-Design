@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include "robot.h"
 
+
 /* ** Probably not using ADC's but leaving this here just in case something changes
 void init_ADC(void)
 {
@@ -97,6 +98,30 @@ void init_inputs()
 	// Init Switch 1
 	GPIOA->MODER &= ~GPIO_MODER_MODER1;
 	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR1_0;
+}
+
+void init_buttonPress()
+{
+	RCC->AHBENR |= RCC_AHBENR_GPIOAEN; //enable buttons
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR0_0; //enable switch 0
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR1_0; // enable switch 1
+	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN;	// ENABLE EXTI BUS CLK
+	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI0_PA | SYSCFG_EXTICR1_EXTI1_PA;	// Map interruption to PA2
+	EXTI->IMR |= EXTI_IMR_MR0 | EXTI_IMR_MR1;	//
+	EXTI->FTSR |= EXTI_FTSR_TR0 | EXTI_FTSR_TR1; // sets to falling edge trigger
+	NVIC_EnableIRQ(EXTI0_1_IRQn);
+}
+void EXTI0_1_IRQHandler(void)
+{
+	if(EXTI->PR &= EXTI_PR_PR0)
+	{
+		asm("nop");
+}
+	else
+{
+	asm("nop");
+}
+	EXTI->PR |= EXTI_PR_PR0; // unmasks the flag of the interrupt
 }
 
 // ***
