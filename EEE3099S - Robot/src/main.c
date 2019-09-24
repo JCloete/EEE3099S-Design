@@ -31,6 +31,7 @@ SOFTWARE.
 #include <stdio.h>
 #include "robot.h"
 #include "logic.h"
+#include "motor.h"
 
 /* Private macro */
 /* Private variables */
@@ -49,11 +50,17 @@ SOFTWARE.
 
 int main(void)
 {
+	init_outputs();
+	init_buttonPress();
+
 	int i = 0;
 	while (1)
 	{
 		asm("nop");
-		followLine();
+		//forward();
+		//delay(20);
+		//stop();
+		//backwards();
 		i++;
 	}
 }

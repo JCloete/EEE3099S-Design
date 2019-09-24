@@ -17,7 +17,8 @@
 #include <stdio.h>
 #include "robot.h"
 
-// ***
+
+/* ** Probably not using ADC's but leaving this here just in case something changes
 void init_ADC(void)
 {
 	// Temporary code storage
@@ -47,9 +48,10 @@ void run_ADC(void)
 
 	//ADC_value = ADC1->DR;
 }
+*/
 
 // ***
-// No idea how this code works. Figure it out sometime
+// No idea how this code works. Figure it out sometime. Perhaps reuse this to make a flashing LED. The Timer interrupt part not the PWM
 void init_PWM(void)
 {
 	RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
@@ -83,8 +85,8 @@ void init_EXTI()
 }
 
 // ***
-// Does what it says. Probably used for the two buttons to start stop robot.
-void init_buttons()
+// Sets all inputs for buttons and sensors probably
+void init_inputs()
 {
 	// Init buttons
 	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
@@ -98,12 +100,38 @@ void init_buttons()
 	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR1_0;
 }
 
+void init_buttonPress()
+{
+	RCC->AHBENR |= RCC_AHBENR_GPIOAEN; //enable buttons
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR0_0; //enable switch 0
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR1_0; // enable switch 1
+	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN;	// ENABLE EXTI BUS CLK
+	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI0_PA | SYSCFG_EXTICR1_EXTI1_PA;	// Map interruption to PA2
+	EXTI->IMR |= EXTI_IMR_MR0 | EXTI_IMR_MR1;	//
+	EXTI->FTSR |= EXTI_FTSR_TR0 | EXTI_FTSR_TR1; // sets to falling edge trigger
+	NVIC_EnableIRQ(EXTI0_1_IRQn);
+}
+void EXTI0_1_IRQHandler(void)
+{
+	if(EXTI->PR &= EXTI_PR_PR0)
+	{
+		asm("nop");
+}
+	else
+{
+	asm("nop");
+}
+	EXTI->PR |= EXTI_PR_PR0; // unmasks the flag of the interrupt
+}
+
 // ***
-// Actual values are going to change because not on STM32F051C6 UCT Devboard
-void init_LED()
+// These pins set motor highs and LED highs
+void init_outputs()
 {
     //Initialize the LED's to be used to output data
 
-    RCC  ->AHBENR |= 1<<18;             // Connecting GPIO Port B to the clock through the bus using bit 18
+    RCC  ->AHBENR |= RCC_AHBENR_GPIOBEN;             // Connecting GPIO Port B to the clock through the bus using bit 18
     GPIOB->MODER  |= 0x00005555;        // Setting modes of the LED's to outputs
+
+    GPIOB->ODR |= GPIO_ODR_2; // Turn enable 1 on
 }
