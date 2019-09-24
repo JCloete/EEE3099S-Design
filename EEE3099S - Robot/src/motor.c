@@ -13,6 +13,8 @@
  *  Everything marked with // *** means its pins are definitely wrong and havent been chosen yet/ coded
  */
 
+// ******* NOTICE: ALL CURRENT PINS HAVE TO BE SWITCHED TO PWM. CURRENTLY LIKE THIS FOR TESTING PURPOSES.
+
 // Includes
 #include "stm32f0xx.h"
 #include <stdio.h>
@@ -26,6 +28,9 @@ void forward(void)
     // Add in a command that makes PWM move robot forward by a proportional amount
 	GPIOB->ODR |= GPIO_ODR_3;
 	GPIOB->ODR &= ~GPIO_ODR_4;
+
+	GPIOB->ODR |= GPIO_ODR_5;
+	GPIOB->ODR &= ~GPIO_ODR_6;
 }
 
 // Use this for braking i think
@@ -35,6 +40,9 @@ void backwards(void)
 	// Add in PWM commands that move motors backwards
 	GPIOB->ODR &= ~GPIO_ODR_3;
 	GPIOB->ODR |= GPIO_ODR_4;
+
+	GPIOB->ODR &= ~GPIO_ODR_5;
+	GPIOB->ODR |= GPIO_ODR_6;
 }
 
 void stop(void)
@@ -42,6 +50,9 @@ void stop(void)
 	// PWM commands to make robot stop
 	GPIOB->ODR &= ~GPIO_ODR_3;
 	GPIOB->ODR &= ~GPIO_ODR_4;
+
+	GPIOB->ODR &= ~GPIO_ODR_5;
+	GPIOB->ODR &= ~GPIO_ODR_6;
 }
 
 // Use defines LEFT or RIGHT to make minor adjustments
@@ -74,14 +85,29 @@ void turn(char direction)
 	{
 	case LEFT:
 		// Add in PWM commands to turn LEFT
+		GPIOB->ODR |= GPIO_ODR_3;
+		GPIOB->ODR &= ~GPIO_ODR_4;
+
+		GPIOB->ODR &= ~GPIO_ODR_5;
+		GPIOB->ODR |= GPIO_ODR_6;
 		break;
 
 	case STRAIGHT:
 		// Add in PWM commands to turn straight
+		GPIOB->ODR |= GPIO_ODR_3;
+		GPIOB->ODR &= ~GPIO_ODR_4;
+
+		GPIOB->ODR |= GPIO_ODR_5;
+		GPIOB->ODR &= ~GPIO_ODR_6;
 		break;
 
 	case RIGHT:
 		// Add in PWM commands to turn in a direction
+		GPIOB->ODR &= ~GPIO_ODR_3;
+		GPIOB->ODR |= GPIO_ODR_4;
+
+		GPIOB->ODR |= GPIO_ODR_5;
+		GPIOB->ODR &= ~GPIO_ODR_6;
 		break;
 
 	default:
@@ -94,4 +120,7 @@ void turn(char direction)
 void turnAround(void)
 {
 	// Add in a command to turn robot 180 degrees then stop
+	turn(LEFT);
+	while(sensors[2] != 1);
+	stop();
 }

@@ -31,7 +31,7 @@
 #include "logic.h"
 #include "motor.h"
 
-char sensors[5] = {0, 0, 1, 0, 0};
+char sensors[5] = {0, 0, 0, 0, 0};
 
 // Logic state robot is in
 char state = 1; // Start default state at Line Following
@@ -74,6 +74,7 @@ void followLine()
 			printf("DEAD END or T-Junction");
 			state = 2;
 			checkIntersection();
+			return;
 		}
 
 
@@ -117,7 +118,7 @@ void checkIntersection()
 			// This is a left turn
 			// Move forward to check for a continuation straight
 			forward();
-			delay(100);
+			delay(20);
 			stop();
 
 			if (sensors[2] == 1)
@@ -134,7 +135,7 @@ void checkIntersection()
 			// This is a right turn
 			// Move forward to check for a continuation straight
 			forward();
-			delay(100);
+			delay(20);
 			stop();
 
 			if (sensors[2] == 1)

@@ -74,33 +74,119 @@ void init_PWM(void)
 }
 
 // ***
+// Sets all inputs for buttons and sensors probably
+void init_inputs()
+{
+	// Enable bus to port A
+	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+
+	// Init Buttons
+	// Init PA0 for button pull to ground
+	GPIOA->MODER &= ~GPIO_MODER_MODER0;
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR0_0;
+
+	// Init PA1 for button pull to ground
+	GPIOA->MODER &= ~GPIO_MODER_MODER1;
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR1_0;
+
+	// Init Sensors
+	// Init PA2 for sensors input (Pulls to HIGH)
+	GPIOA->MODER &= ~GPIO_MODER_MODER2;
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR2_1;
+
+	// Init PA3 for sensors input (Pulls to HIGH)
+	GPIOA->MODER &= ~GPIO_MODER_MODER3;
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR3_1;
+
+	// Init PA4 for sensors input (Pulls to HIGH)
+	GPIOA->MODER &= ~GPIO_MODER_MODER4;
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR4_1;
+
+	// Init PA5 for sensors input (Pulls to HIGH)
+	GPIOA->MODER &= ~GPIO_MODER_MODER5;
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR5_1;
+
+	// Init PA6 for sensors input (Pulls to HIGH)
+	GPIOA->MODER &= ~GPIO_MODER_MODER6;
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR6_1;
+
+
+}
+
+// ***
 // Interrupt enable. Clashes with ADC code. Have to sense like every 100ms or something to allow Interrupts?
 void init_EXTI()
 {
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN;	// ENABLE EXTI BUS CLK
-	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI2_PA;	// Map interruption to PA2
-	EXTI->IMR |= EXTI_IMR_MR2;	//
-	EXTI->FTSR |= EXTI_FTSR_TR2;
+	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI0_PA | SYSCFG_EXTICR1_EXTI1_PA | SYSCFG_EXTICR1_EXTI2_PA | SYSCFG_EXTICR1_EXTI3_PA;	// Map interruption to PA[0,1,2,3]
+	SYSCFG->EXTICR[1] |= SYSCFG_EXTICR2_EXTI4_PA | SYSCFG_EXTICR2_EXTI5_PA | SYSCFG_EXTICR2_EXTI6_PA;	// Map interruption to PA[4,5,6]
+	EXTI->IMR |= EXTI_IMR_MR0 | EXTI_IMR_MR1 | EXTI_IMR_MR2 | EXTI_IMR_MR3 | EXTI_IMR_MR4 | EXTI_IMR_MR5 | EXTI_IMR_MR6;	//
+	EXTI->FTSR |= EXTI_FTSR_TR0 | EXTI_FTSR_TR1;
+	EXTI->RTSR |= EXTI_RTSR_TR2 | EXTI_RTSR_TR3 | EXTI_RTSR_TR4 | EXTI_RTSR_TR5 | EXTI_RTSR_TR6;
+	NVIC_EnableIRQ(EXTI0_1_IRQn);
 	NVIC_EnableIRQ(EXTI2_3_IRQn);
+	NVIC_EnableIRQ(EXTI4_15_IRQn);
+}
+
+void EXTI0_1_IRQHandler(void)
+{
+	if(EXTI->PR &= EXTI_PR_PR0)
+	{
+		asm("nop");
+	} else {
+		asm("nop");
+	}
+
+	EXTI->PR |= EXTI_PR_PR0; // unmasks the flag of the interrupt
+	EXTI->PR |= EXTI_PR_PR1; // unmasks the flag of the interrupt
+}
+
+void EXTI2_3_IRQHandler(void)
+{
+	if(EXTI->PR &= EXTI_PR_PR2)
+	{
+		asm("nop");
+	} else {
+		asm("nop");
+	}
+
+	EXTI->PR |= EXTI_PR_PR2; // unmasks the flag of the interrupt
+	EXTI->PR |= EXTI_PR_PR3; // unmasks the flag of the interrupt
+}
+
+void EXTI4_15_IRQHandler(void)
+{
+	if(EXTI->PR &= EXTI_PR_PR4)
+	{
+		asm("nop");
+	} else if (EXTI->PR &= EXTI_PR_PR5) {
+		asm("nop");
+	} else if (EXTI->PR &= EXTI_PR_PR6) {
+		asm("nop");
+	} else {
+		printf("Unknown interrupt");
+	}
+
+	EXTI->PR |= EXTI_PR_PR4; // unmasks the flag of the interrupt
+	EXTI->PR |= EXTI_PR_PR5; // unmasks the flag of the interrupt
+	EXTI->PR |= EXTI_PR_PR6; // unmasks the flag of the interrupt
 }
 
 // ***
-// Sets all inputs for buttons and sensors probably
-void init_inputs()
+// These pins set motor highs and LED highs
+void init_outputs()
 {
-	// Init buttons
-	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+    //Initialize the LED's to be used to output data
 
-	// Init Switch 0
-	GPIOA->MODER &= ~GPIO_MODER_MODER0;
-	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR0_0;
+    RCC  ->AHBENR |= RCC_AHBENR_GPIOBEN;	// Connecting GPIO Port B to the clock through the bus using bit 18
+    GPIOB->MODER  |= 0x00001555;        // Setting modes of the PB[0-7] to outputs
 
-	// Init Switch 1
-	GPIOA->MODER &= ~GPIO_MODER_MODER1;
-	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR1_0;
+    GPIOB->ODR |= GPIO_ODR_2; // Turn enable 1-2 on
+    GPIOB->ODR |= GPIO_ODR_7; // Turn enable 3-4 on
 }
 
-void init_buttonPress()
+/*
+void init_buttons()
 {
 	RCC->AHBENR |= RCC_AHBENR_GPIOAEN; //enable buttons
 	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR0_0; //enable switch 0
@@ -111,27 +197,4 @@ void init_buttonPress()
 	EXTI->FTSR |= EXTI_FTSR_TR0 | EXTI_FTSR_TR1; // sets to falling edge trigger
 	NVIC_EnableIRQ(EXTI0_1_IRQn);
 }
-void EXTI0_1_IRQHandler(void)
-{
-	if(EXTI->PR &= EXTI_PR_PR0)
-	{
-		asm("nop");
-}
-	else
-{
-	asm("nop");
-}
-	EXTI->PR |= EXTI_PR_PR0; // unmasks the flag of the interrupt
-}
-
-// ***
-// These pins set motor highs and LED highs
-void init_outputs()
-{
-    //Initialize the LED's to be used to output data
-
-    RCC  ->AHBENR |= RCC_AHBENR_GPIOBEN;             // Connecting GPIO Port B to the clock through the bus using bit 18
-    GPIOB->MODER  |= 0x00005555;        // Setting modes of the LED's to outputs
-
-    GPIOB->ODR |= GPIO_ODR_2; // Turn enable 1 on
-}
+*/
