@@ -28,6 +28,7 @@ SOFTWARE.
 */
 
 /* Includes */
+#include "stm32f0xx.h"
 #include <stdio.h>
 #include "robot.h"
 #include "logic.h"
@@ -51,16 +52,37 @@ SOFTWARE.
 int main(void)
 {
 	init_outputs();
-	init_buttonPress();
+	init_inputs();
+	init_EXTI();
+	init_PWM();
+	stop();
 
-	int i = 0;
+	//while(finished);
+
 	while (1)
 	{
-		asm("nop");
-		//forward();
-		//delay(20);
-		//stop();
-		//backwards();
-		i++;
+		// Starts robot moving
+		forward();
+
+		// Solving maze code
+		while(1)
+		{
+			followLine();
+		}
+/*
+		// Puts the robot in a finished state
+		finish();
+
+		// Waits for button press
+		while(finished)
+		{
+			GPIOB->ODR |= GPIO_ODR_0;
+			delay(50);
+			GPIOB->ODR &= ~GPIO_ODR_0;
+			delay(50);
+		}
+		*/
 	}
+
+
 }

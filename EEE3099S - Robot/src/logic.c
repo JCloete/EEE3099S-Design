@@ -31,12 +31,12 @@
 #include "logic.h"
 #include "motor.h"
 
-char sensors[5] = {0, 0, 0, 0, 0};
+char sensors[5] = {0, 0, 1, 0, 0};
 
 // Logic state robot is in
-char state = 1; // Start default state at Line Following
 char error = 0; // Start with on correct path
 char pastError = 9; //  Start at an error that is impossible
+char finished = 1; // Indicates when the robot has found the maze
 
 // Path array to store information about path (1st entry is Intersection type, 2nd entry is time taken to get to this intersection from last intersection)
 char path[10][100][2];
@@ -45,53 +45,47 @@ char turnNum = 0; // This gets incremented with each intersection discovered
 
 void followLine()
 {
-	if (state == 1)
+	// This section keeps it following the line
+	// Smaller If statements inside check if its just a correction or turn
+	if (sensors[1] == 0 && sensors[2] == 1 && sensors[3] == 0)
 	{
-		// This section keeps it following the line
-		// Smaller If statements inside check if its just a correction or turn
-		if (sensors[1] == 0 && sensors[2] == 1 && sensors[3] == 0)
+		error = STRAIGHT;
+	} else if (sensors[1] == 0 && sensors[3] == 1) {
+		if (sensors[4] == 1)
 		{
-			error = STRAIGHT;
-		} else if (sensors[1] == 0 && sensors[3] == 1) {
-			if (sensors[4] == 1)
-			{
-				state = 2;
-				checkIntersection();
-				return;
-			} else {
-				error = RIGHT;
-			}
-		} else if (sensors[1] == 1 && sensors[3] == 0) {
-			if (sensors[0] == 1)
-			{
-				state = 2;
-				checkIntersection();
-				return;
-			} else {
-				error = LEFT;
-			}
-		} else {
-			printf("DEAD END or T-Junction");
-			state = 2;
 			checkIntersection();
 			return;
+		} else {
+			error = RIGHT;
 		}
-
-
-		// Add in a check for if the sensors are truly fucked up
-		makeCorrections(error); // Adds in what the error is for corrections to be made
-
+	} else if (sensors[1] == 1 && sensors[3] == 0) {
+		if (sensors[0] == 1)
+		{
+			checkIntersection();
+			return;
+		} else {
+			error = LEFT;
+		}
 	} else {
-		printf("Not in correct state for line following!");
+		printf("DEAD END or T-Junction");
+		checkIntersection();
+		return;
 	}
+
+
+	// Add in a check for if the sensors are truly fucked up
+	makeCorrections(error); // Adds in what the error is for corrections to be made
+
 }
 
 void checkIntersection()
 {
+	stop();
+	delay(1);
 	// Check dead end
 	if (sensors[0] == 0 && sensors[1] == 0 && sensors[2] == 0 && sensors[3] == 0 && sensors[4] == 0)
 	{
-		addInfo(6);
+		addInfo(6, 4);
 		turnAround();
 	} else if (sensors[0] == 1 || sensors[4] == 1) {
 		// Check what kind of intersection
@@ -100,15 +94,22 @@ void checkIntersection()
 			// This is a T-section or crossroads
 			// Move forward to check for a continuation straight
 			forward();
-			delay(100);
+			delay(20);
 			stop();
 
-			if (sensors[2] == 1)
+			if (sensors[0] == 1 && sensors[4] == 1)
+			{
+				// This is the circle
+				finished = 1;
+				stop();
+				return;
+			}
+			else if (sensors[2] == 1)
 			{
 				// Add in a flag to indicate there is a straight
-				addInfo(3);
+				addInfo(4, 1);
 			} else {
-				addInfo(2);
+				addInfo(3, 1);
 			}
 
 			makeTurn(LEFT);
@@ -124,9 +125,9 @@ void checkIntersection()
 			if (sensors[2] == 1)
 			{
 				// Add in a flag to indicate there is a straight
-				addInfo(1);
+				addInfo(2,1);
 			} else {
-				addInfo(0);
+				addInfo(1,1);
 			}
 
 			makeTurn(LEFT);
@@ -141,9 +142,9 @@ void checkIntersection()
 			if (sensors[2] == 1)
 			{
 				// Add in a flag to indicate there is a straight
-				addInfo(5);
+				addInfo(6, 3);
 			} else {
-				addInfo(4);
+				addInfo(5, 3);
 			}
 
 			makeTurn(RIGHT);
@@ -156,83 +157,118 @@ void checkIntersection()
 // Decides on what corrections to be made depending on error
 void makeCorrections(char error)
 {
-	if (state == 1)
+	if (error != pastError)
 	{
-		if (error != pastError)
+		switch (error)
 		{
-			switch (error)
-			{
-			case STRAIGHT:
-				pastError = STRAIGHT;
-				correctPath(STRAIGHT);
-				break;
+		case STRAIGHT:
+			pastError = STRAIGHT;
+			correctPath(STRAIGHT);
+			break;
 
-			case LEFT:
-				pastError = LEFT;
-				correctPath(LEFT);
-				break;
+		case LEFT:
+			pastError = LEFT;
+			correctPath(LEFT);
+			break;
 
-			case RIGHT:
-				pastError = RIGHT;
-				correctPath(RIGHT);
-				break;
+		case RIGHT:
+			pastError = RIGHT;
+			correctPath(RIGHT);
+			break;
 
-			default:
-				printf("Undefined correction");
-			}
+		default:
+			printf("Undefined correction");
 		}
-	} else {
-		printf("Not correct state to make corrections to path!");
 	}
 }
 
 void makeTurn(char direction)
 {
-	if (state == 2)
+	// Add in a command to turn robot 90 degrees left or right then stop
+	switch (direction)
 	{
-		// Add in a command to turn robot 90 degrees left or right then stop
-		switch (direction)
-		{
-		case 0:
-			turn(LEFT);
-			break;
+	case 0:
+		forward();
+		delay(20);
+		stop();
+		turn(LEFT);
+		break;
 
-		case 1:
-			turn(STRAIGHT);
-			break;
-
-		case 2:
-			turn(RIGHT);
-			break;
-
-		default:
-			printf("Not a valid direction");
-		}
-
-		while(sensors[2] == 1); // Wait for the sensor to get off original path and move into transition mode (Otherwise below line executes immediately)
-		while(sensors[2] != 1); // Constantly check for if turn is completed
+	case 1:
+		forward();
+		delay(20);
+		stop();
 		turn(STRAIGHT);
-		state = 1;
+		break;
 
-	} else {
-		printf("Not in a valid state for turning");
+	case 2:
+		forward();
+		delay(20);
+		stop();
+		turn(RIGHT);
+		break;
+
+	default:
+		printf("Not a valid direction");
 	}
+
+	while(sensors[2] == 1); // Wait for the sensor to get off original path and move into transition mode (Otherwise below line executes immediately)
+	while(sensors[2] != 1); // Constantly check for if turn is completed
+	turn(STRAIGHT);
+	turnNum++;
 }
 
 // Suggested delay between 1000 - 20000 gives between 0.4 - 3
 void delay(int delay)
 {
 	for (int i = 0; i < delay; i++)
-		for (int j = 0; j < 100000; j++);
+		for (int j = 0; j < 10000; j++);
 }
 
 // intersection is a set of defined numbers assinged to types of intersections defined below
-// 0 - Left Turn | 1 - Left Turn str | 2 - T-junction | 3 - Crossroads | 4 - Right Turn | 5 - Right Turn str | 6 - Dead-End
-void addInfo(char intersection)
+// 0 - Ignore intersection | 1 - Left Turn | 2 - Left Turn str | 3 - T-junction | 4 - Crossroads | 5 - Right Turn | 6 - Right Turn str | 7 - Dead-End
+// 0 - Skip Turn | 1 - LEFT Turn | 2 - Straight | 3 - RIGHT Turn | 4 - Turn Around
+void addInfo(char intersection, char turnTaken)
 {
 	// Adds information to the path array
 	path[attempt][turnNum][0] = intersection;
-	path[attempt][turnNum][1] = 0;
+	path[attempt][turnNum][1] = turnTaken;
+}
+
+void finish()
+{
+	// Optimise path just taken
+	// Start new array
+	int length = 0;
+	int deadend = 0;
+
+	for (int i = 0; i<100; i++)
+	{
+		if (path[attempt][i][0] == 6)
+		{
+			deadend = i;
+			path[attempt][i][1] = 0;
+			i++;
+			while(path[attempt][i][0] == 1 || path[attempt][i][0] == 5)
+			{
+				path[attempt][i][0] = 0;
+				length++;
+			}
+
+			for (int j = 0; j < length; j++)
+			{
+				path[attempt][deadend-j][0] = 0;
+			}
+
+			// Turn recorded turn into something different and change intersection into a Intersection that removes the path down the dead end
+
+		}
+
+	}
+
+
+	attempt++;
+	turnNum = 0;
 }
 
 /*

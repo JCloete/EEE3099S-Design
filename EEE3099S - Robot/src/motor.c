@@ -48,11 +48,11 @@ void backwards(void)
 void stop(void)
 {
 	// PWM commands to make robot stop
-	GPIOB->ODR &= ~GPIO_ODR_3;
-	GPIOB->ODR &= ~GPIO_ODR_4;
+	GPIOB->ODR |= GPIO_ODR_3;
+	GPIOB->ODR |= GPIO_ODR_4;
 
-	GPIOB->ODR &= ~GPIO_ODR_5;
-	GPIOB->ODR &= ~GPIO_ODR_6;
+	GPIOB->ODR |= GPIO_ODR_5;
+	GPIOB->ODR |= GPIO_ODR_6;
 }
 
 // Use defines LEFT or RIGHT to make minor adjustments
@@ -62,17 +62,20 @@ void correctPath(char direction)
 	{
 	case LEFT:
 		// PWM Code to make it turn the robot left
-		asm("nop");
+		TIM2->CCR3 = 80 * 100;
+		TIM2->CCR4 = 100 * 100;
 		break;
 
 	case STRAIGHT:
 		// PWM code to make it go straight
-		asm("nop");
+		TIM2->CCR3 = 100 * 100;
+		TIM2->CCR4 = 100 * 100;
 		break;
 
 	case RIGHT:
 		// PWM code to make it go right
-		asm("nop");
+		TIM2->CCR3 = 100 * 100;
+		TIM2->CCR4 = 80 * 100;
 		break;
 	}
 }

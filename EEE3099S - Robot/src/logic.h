@@ -14,9 +14,9 @@
 extern char sensors[5];
 
 // Logic state robot is in
-extern char state;
 extern char error;
 extern char pastError;
+extern char finished;
 
 // Stores all Path information
 extern char path[10][100][2];
@@ -33,6 +33,7 @@ void makeTurn(char direction);
 void delay(int delay);
 
 void addInfo(char intersection);
+void finish(void);
 
 // char equalArrays(char arr1, char arr2);
 

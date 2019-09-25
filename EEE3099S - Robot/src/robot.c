@@ -16,6 +16,7 @@
 #include "stm32f0xx.h"
 #include <stdio.h>
 #include "robot.h"
+#include "logic.h"
 
 
 /* ** Probably not using ADC's but leaving this here just in case something changes
@@ -61,11 +62,11 @@ void init_PWM(void)
 	GPIOB->AFR[1] |= (2 << (4*(10-8)));
 	GPIOB->AFR[1] |= (2 << (4*(11-8)));
 
-	TIM2->ARR=3999;
+	TIM2->ARR=9999;
 	TIM2->CCMR2 |= (TIM_CCMR2_OC3M_2|TIM_CCMR2_OC3M_1);
 	TIM2->CCMR2 |= (TIM_CCMR2_OC4M_2|TIM_CCMR2_OC4M_1);
-	TIM2->CCR3 = 50 * 40;
-	TIM2->CCR4 = 50 * 40;
+	TIM2->CCR3 = 100 * 100;
+	TIM2->CCR4 = 100 * 100;
 
 	TIM2->CCER |= TIM_CCER_CC3E;
 	TIM2->CCER |= TIM_CCER_CC4E;
@@ -118,59 +119,278 @@ void init_inputs()
 void init_EXTI()
 {
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN;	// ENABLE EXTI BUS CLK
-	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI0_PA | SYSCFG_EXTICR1_EXTI1_PA | SYSCFG_EXTICR1_EXTI2_PA | SYSCFG_EXTICR1_EXTI3_PA;	// Map interruption to PA[0,1,2,3]
+	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI0_PA | SYSCFG_EXTICR1_EXTI2_PA | SYSCFG_EXTICR1_EXTI3_PA;	// Map interruption to PA[0,1,2,3]
 	SYSCFG->EXTICR[1] |= SYSCFG_EXTICR2_EXTI4_PA | SYSCFG_EXTICR2_EXTI5_PA | SYSCFG_EXTICR2_EXTI6_PA;	// Map interruption to PA[4,5,6]
-	EXTI->IMR |= EXTI_IMR_MR0 | EXTI_IMR_MR1 | EXTI_IMR_MR2 | EXTI_IMR_MR3 | EXTI_IMR_MR4 | EXTI_IMR_MR5 | EXTI_IMR_MR6;	//
-	EXTI->FTSR |= EXTI_FTSR_TR0 | EXTI_FTSR_TR1;
+	EXTI->IMR |= EXTI_IMR_MR0 | EXTI_IMR_MR2 | EXTI_IMR_MR3 | EXTI_IMR_MR4 | EXTI_IMR_MR5 | EXTI_IMR_MR6;	//
+	EXTI->FTSR |= EXTI_FTSR_TR0; //| EXTI_FTSR_TR1;
+	EXTI->FTSR |= EXTI_FTSR_TR2 | EXTI_FTSR_TR3 | EXTI_FTSR_TR4 | EXTI_FTSR_TR5 | EXTI_FTSR_TR6;
 	EXTI->RTSR |= EXTI_RTSR_TR2 | EXTI_RTSR_TR3 | EXTI_RTSR_TR4 | EXTI_RTSR_TR5 | EXTI_RTSR_TR6;
-	NVIC_EnableIRQ(EXTI0_1_IRQn);
+	NVIC_EnableIRQ(EXTI0_1_IRQn);// SYSCFG_EXTICR1_EXTI0_PA | SYSCFG_EXTICR1_EXTI1_PA | EXTI_IMR_MR0 | EXTI_IMR_MR1 |
 	NVIC_EnableIRQ(EXTI2_3_IRQn);
 	NVIC_EnableIRQ(EXTI4_15_IRQn);
 }
 
 void EXTI0_1_IRQHandler(void)
 {
-	if(EXTI->PR &= EXTI_PR_PR0)
-	{
-		asm("nop");
-	} else {
-		asm("nop");
-	}
+	delay(2);
 
-	EXTI->PR |= EXTI_PR_PR0; // unmasks the flag of the interrupt
-	EXTI->PR |= EXTI_PR_PR1; // unmasks the flag of the interrupt
+	if(EXTI->PR & EXTI_PR_PR0)
+	{
+		finished = 0;
+
+		EXTI->PR |= EXTI_PR_PR0; // unmasks the flag of the interrupt
+	}
+	/*
+	if (EXTI->PR & EXTI_PR_PR1){
+		asm("nop");
+
+		EXTI->PR |= EXTI_PR_PR1; // unmasks the flag of the interrupt
+	}
+	*/
 }
 
+
+/*
 void EXTI2_3_IRQHandler(void)
 {
-	if(EXTI->PR &= EXTI_PR_PR2)
+	delay(2);
+
+	if(EXTI->PR & EXTI_PR_PR2)
 	{
 		asm("nop");
-	} else {
-		asm("nop");
+		if (GPIOA->IDR & GPIO_IDR_2)
+		{
+			GPIOB->ODR |= GPIO_ODR_3;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_3;
+		}
+
+		EXTI->PR |= EXTI_PR_PR2; // unmasks the flag of the interrupt
 	}
 
-	EXTI->PR |= EXTI_PR_PR2; // unmasks the flag of the interrupt
-	EXTI->PR |= EXTI_PR_PR3; // unmasks the flag of the interrupt
+	if (EXTI->PR & EXTI_PR_PR3) {
+		asm("nop");
+
+		if (GPIOA->IDR & GPIO_IDR_3)
+		{
+			GPIOB->ODR |= GPIO_ODR_4;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_4;
+		}
+
+		EXTI->PR |= EXTI_PR_PR3; // unmasks the flag of the interrupt
+	}
+
+	if(EXTI->PR & EXTI_PR_PR4)
+	{
+		asm("nop");
+		if (GPIOA->IDR & GPIO_IDR_4)
+		{
+			GPIOB->ODR |= GPIO_ODR_5;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_5;
+		}
+
+		EXTI->PR |= EXTI_PR_PR4; // unmasks the flag of the interrupt
+	}
+
+	if (EXTI->PR & EXTI_PR_PR5) {
+		asm("nop");
+		if (GPIOA->IDR & GPIO_IDR_5)
+		{
+			GPIOB->ODR |= GPIO_ODR_6;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_6;
+		}
+
+		EXTI->PR |= EXTI_PR_PR5; // unmasks the flag of the interrupt
+	}
+
+	if (EXTI->PR & EXTI_PR_PR6)
+	{
+		asm("nop");
+		if (GPIOA->IDR & GPIO_IDR_6)
+		{
+			GPIOB->ODR |= GPIO_ODR_7;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_7;
+		}
+
+		EXTI->PR |= EXTI_PR_PR6; // unmasks the flag of the interrupt
+	}
 }
 
 void EXTI4_15_IRQHandler(void)
 {
-	if(EXTI->PR &= EXTI_PR_PR4)
+	delay(2);
+
+	if(EXTI->PR & EXTI_PR_PR2)
 	{
 		asm("nop");
-	} else if (EXTI->PR &= EXTI_PR_PR5) {
+		if (GPIOA->IDR & GPIO_IDR_2)
+		{
+			GPIOB->ODR |= GPIO_ODR_3;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_3;
+		}
+
+		EXTI->PR |= EXTI_PR_PR2; // unmasks the flag of the interrupt
+	}
+
+	if (EXTI->PR & EXTI_PR_PR3) {
 		asm("nop");
-	} else if (EXTI->PR &= EXTI_PR_PR6) {
+
+		if (GPIOA->IDR & GPIO_IDR_3)
+		{
+			GPIOB->ODR |= GPIO_ODR_4;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_4;
+		}
+
+		EXTI->PR |= EXTI_PR_PR3; // unmasks the flag of the interrupt
+	}
+
+	if(EXTI->PR & EXTI_PR_PR4)
+	{
 		asm("nop");
+		if (GPIOA->IDR & GPIO_IDR_4)
+		{
+			GPIOB->ODR |= GPIO_ODR_5;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_5;
+		}
+
+		EXTI->PR |= EXTI_PR_PR4; // unmasks the flag of the interrupt
+	}
+
+	if (EXTI->PR & EXTI_PR_PR5) {
+		asm("nop");
+		if (GPIOA->IDR & GPIO_IDR_5)
+		{
+			GPIOB->ODR |= GPIO_ODR_6;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_6;
+		}
+
+		EXTI->PR |= EXTI_PR_PR5; // unmasks the flag of the interrupt
+	}
+
+	if (EXTI->PR & EXTI_PR_PR6)
+	{
+		asm("nop");
+		if (GPIOA->IDR & GPIO_IDR_6)
+		{
+			GPIOB->ODR |= GPIO_ODR_7;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_7;
+		}
+
+		EXTI->PR |= EXTI_PR_PR6; // unmasks the flag of the interrupt
+	}
+}
+*/
+
+// TEST
+void EXTI2_3_IRQHandler(void)
+{
+	delay(2);
+
+	if (GPIOA->IDR & GPIO_IDR_2)
+	{
+		sensors[4] = 1;
 	} else {
-		printf("Unknown interrupt");
+		sensors[4] = 0;
+	}
+
+	EXTI->PR |= EXTI_PR_PR2; // unmasks the flag of the interrupt
+
+	if (GPIOA->IDR & GPIO_IDR_3)
+	{
+		sensors[3] = 1;
+	} else {
+		sensors[3] = 0;
+	}
+
+	EXTI->PR |= EXTI_PR_PR3; // unmasks the flag of the interrupt
+
+	if (GPIOA->IDR & GPIO_IDR_4)
+	{
+		sensors[2] = 1;
+	} else {
+		sensors[2] = 0;
 	}
 
 	EXTI->PR |= EXTI_PR_PR4; // unmasks the flag of the interrupt
+
+	if (GPIOA->IDR & GPIO_IDR_5)
+	{
+		sensors[1] = 1;
+	} else {
+		sensors[1] = 0;
+	}
+
 	EXTI->PR |= EXTI_PR_PR5; // unmasks the flag of the interrupt
+
+	if (GPIOA->IDR & GPIO_IDR_6)
+	{
+		sensors[0] = 1;
+	} else {
+		sensors[0] = 0;
+	}
+
 	EXTI->PR |= EXTI_PR_PR6; // unmasks the flag of the interrupt
 }
+
+void EXTI4_15_IRQHandler(void)
+{
+	delay(2);
+
+	if (GPIOA->IDR & GPIO_IDR_2)
+	{
+		sensors[4] = 1;
+	} else {
+		sensors[4] = 0;
+	}
+
+	EXTI->PR |= EXTI_PR_PR2; // unmasks the flag of the interrupt
+
+	if (GPIOA->IDR & GPIO_IDR_3)
+	{
+		sensors[3] = 1;
+	} else {
+		sensors[3] = 0;
+	}
+
+	EXTI->PR |= EXTI_PR_PR3; // unmasks the flag of the interrupt
+
+	if (GPIOA->IDR & GPIO_IDR_4)
+	{
+		sensors[2] = 1;
+	} else {
+		sensors[2] = 0;
+	}
+
+	EXTI->PR |= EXTI_PR_PR4; // unmasks the flag of the interrupt
+
+	if (GPIOA->IDR & GPIO_IDR_5)
+	{
+		sensors[1] = 1;
+	} else {
+		sensors[1] = 0;
+	}
+
+	EXTI->PR |= EXTI_PR_PR5; // unmasks the flag of the interrupt
+
+	if (GPIOA->IDR & GPIO_IDR_6)
+	{
+		sensors[0] = 1;
+	} else {
+		sensors[0] = 0;
+	}
+
+	EXTI->PR |= EXTI_PR_PR6; // unmasks the flag of the interrupt
+}
+
 
 // ***
 // These pins set motor highs and LED highs
@@ -180,9 +400,7 @@ void init_outputs()
 
     RCC  ->AHBENR |= RCC_AHBENR_GPIOBEN;	// Connecting GPIO Port B to the clock through the bus using bit 18
     GPIOB->MODER  |= 0x00001555;        // Setting modes of the PB[0-7] to outputs
-
-    GPIOB->ODR |= GPIO_ODR_2; // Turn enable 1-2 on
-    GPIOB->ODR |= GPIO_ODR_7; // Turn enable 3-4 on
+    // GPIOB->MODER  |= 0x00005555; // For testing purposes
 }
 
 /*
