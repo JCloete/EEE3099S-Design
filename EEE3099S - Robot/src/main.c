@@ -57,7 +57,8 @@ int main(void)
 	init_PWM();
 	stop();
 
-	//while(finished);
+	while(finished);
+	// forward();
 
 	while (1)
 	{
@@ -69,7 +70,7 @@ int main(void)
 		{
 			followLine();
 		}
-/*
+
 		// Puts the robot in a finished state
 		finish();
 
@@ -81,8 +82,6 @@ int main(void)
 			GPIOB->ODR &= ~GPIO_ODR_0;
 			delay(50);
 		}
-		*/
+
 	}
-
-
 }

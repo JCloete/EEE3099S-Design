@@ -32,7 +32,7 @@ void makeTurn(char direction);
 
 void delay(int delay);
 
-void addInfo(char intersection);
+void addInfo(char intersection, char turnTaken);
 void finish(void);
 
 // char equalArrays(char arr1, char arr2);

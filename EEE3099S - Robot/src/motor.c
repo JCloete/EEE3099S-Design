@@ -62,20 +62,20 @@ void correctPath(char direction)
 	{
 	case LEFT:
 		// PWM Code to make it turn the robot left
-		TIM2->CCR3 = 80 * 100;
-		TIM2->CCR4 = 100 * 100;
+		TIM2->CCR3 = 40 * 80;
+		TIM2->CCR4 = 50 * 80;
 		break;
 
 	case STRAIGHT:
 		// PWM code to make it go straight
-		TIM2->CCR3 = 100 * 100;
-		TIM2->CCR4 = 100 * 100;
+		TIM2->CCR3 = 50 * 80;
+		TIM2->CCR4 = 50 * 80;
 		break;
 
 	case RIGHT:
 		// PWM code to make it go right
-		TIM2->CCR3 = 100 * 100;
-		TIM2->CCR4 = 80 * 100;
+		TIM2->CCR3 = 50 * 80;
+		TIM2->CCR4 = 40 * 80;
 		break;
 	}
 }
@@ -123,7 +123,9 @@ void turn(char direction)
 void turnAround(void)
 {
 	// Add in a command to turn robot 180 degrees then stop
+	/*
 	turn(LEFT);
 	while(sensors[2] != 1);
 	stop();
+	*/
 }

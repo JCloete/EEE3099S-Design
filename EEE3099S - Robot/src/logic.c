@@ -45,11 +45,13 @@ char turnNum = 0; // This gets incremented with each intersection discovered
 
 void followLine()
 {
+	GPIOB->ODR &= GPIO_ODR_0;
 	// This section keeps it following the line
 	// Smaller If statements inside check if its just a correction or turn
 	if (sensors[1] == 0 && sensors[2] == 1 && sensors[3] == 0)
 	{
-		error = STRAIGHT;
+		forward();
+		return;
 	} else if (sensors[1] == 0 && sensors[3] == 1) {
 		if (sensors[4] == 1)
 		{
@@ -80,13 +82,14 @@ void followLine()
 
 void checkIntersection()
 {
+	GPIOB->ODR |= GPIO_ODR_0;
 	stop();
-	delay(1);
+	delay(300);
 	// Check dead end
 	if (sensors[0] == 0 && sensors[1] == 0 && sensors[2] == 0 && sensors[3] == 0 && sensors[4] == 0)
 	{
 		addInfo(6, 4);
-		turnAround();
+		makeTurn(LEFT);
 	} else if (sensors[0] == 1 || sensors[4] == 1) {
 		// Check what kind of intersection
 		if (sensors[0] == 1 && sensors[4] == 1)
@@ -94,14 +97,13 @@ void checkIntersection()
 			// This is a T-section or crossroads
 			// Move forward to check for a continuation straight
 			forward();
-			delay(20);
+			delay(300);
 			stop();
 
 			if (sensors[0] == 1 && sensors[4] == 1)
 			{
 				// This is the circle
 				finished = 1;
-				stop();
 				return;
 			}
 			else if (sensors[2] == 1)
@@ -119,7 +121,7 @@ void checkIntersection()
 			// This is a left turn
 			// Move forward to check for a continuation straight
 			forward();
-			delay(20);
+			delay(300);
 			stop();
 
 			if (sensors[2] == 1)
@@ -136,7 +138,7 @@ void checkIntersection()
 			// This is a right turn
 			// Move forward to check for a continuation straight
 			forward();
-			delay(20);
+			delay(300);
 			stop();
 
 			if (sensors[2] == 1)
@@ -157,6 +159,7 @@ void checkIntersection()
 // Decides on what corrections to be made depending on error
 void makeCorrections(char error)
 {
+	delay(2);
 	if (error != pastError)
 	{
 		switch (error)
@@ -179,6 +182,8 @@ void makeCorrections(char error)
 		default:
 			printf("Undefined correction");
 		}
+	} else {
+		forward();
 	}
 }
 
@@ -188,33 +193,34 @@ void makeTurn(char direction)
 	switch (direction)
 	{
 	case 0:
-		forward();
-		delay(20);
-		stop();
+		//forward();
+		//delay(50);
+		//stop();
 		turn(LEFT);
 		break;
 
 	case 1:
-		forward();
-		delay(20);
-		stop();
+		//forward();
+		//delay(50);
+		//stop();
 		turn(STRAIGHT);
 		break;
 
 	case 2:
-		forward();
-		delay(20);
-		stop();
+		//forward();
+		//delay(50);
+		//stop();
 		turn(RIGHT);
 		break;
 
 	default:
 		printf("Not a valid direction");
+		forward();
 	}
 
 	while(sensors[2] == 1); // Wait for the sensor to get off original path and move into transition mode (Otherwise below line executes immediately)
 	while(sensors[2] != 1); // Constantly check for if turn is completed
-	turn(STRAIGHT);
+	forward();
 	turnNum++;
 }
 
@@ -237,10 +243,12 @@ void addInfo(char intersection, char turnTaken)
 
 void finish()
 {
+	/*
 	// Optimise path just taken
 	// Start new array
 	int length = 0;
 	int deadend = 0;
+
 
 	for (int i = 0; i<100; i++)
 	{
@@ -265,7 +273,7 @@ void finish()
 		}
 
 	}
-
+*/
 
 	attempt++;
 	turnNum = 0;
