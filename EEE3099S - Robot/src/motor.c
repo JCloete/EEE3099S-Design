@@ -123,9 +123,7 @@ void turn(char direction)
 void turnAround(void)
 {
 	// Add in a command to turn robot 180 degrees then stop
-	/*
 	turn(LEFT);
 	while(sensors[2] != 1);
 	stop();
-	*/
 }

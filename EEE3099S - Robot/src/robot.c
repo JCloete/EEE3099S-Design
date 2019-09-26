@@ -100,8 +100,8 @@ void init_inputs()
 	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR3_1;
 
 	// Init PA4 for sensors input (Pulls to HIGH)
-	GPIOA->MODER &= ~GPIO_MODER_MODER4;
-	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR4_1;
+	//GPIOA->MODER &= ~GPIO_MODER_MODER4;
+	//GPIOA->PUPDR |= GPIO_PUPDR_PUPDR4_1;
 
 	// Init PA5 for sensors input (Pulls to HIGH)
 	GPIOA->MODER &= ~GPIO_MODER_MODER5;
@@ -111,11 +111,17 @@ void init_inputs()
 	GPIOA->MODER &= ~GPIO_MODER_MODER6;
 	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR6_1;
 
+	// Init PA7 for sensors input (Pulls to HIGH)
+	GPIOA->MODER &= ~GPIO_MODER_MODER7;
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR7_1;
+
 
 }
 
+
+
 // ***
-// Interrupt enable. Clashes with ADC code. Have to sense like every 100ms or something to allow Interrupts?
+// Interrupt enables.
 void init_EXTI()
 {
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN;	// ENABLE EXTI BUS CLK
@@ -130,6 +136,7 @@ void init_EXTI()
 	NVIC_EnableIRQ(EXTI4_15_IRQn);
 }
 
+
 void EXTI0_1_IRQHandler(void)
 {
 	delay(2);
@@ -140,201 +147,71 @@ void EXTI0_1_IRQHandler(void)
 
 		EXTI->PR |= EXTI_PR_PR0; // unmasks the flag of the interrupt
 	}
+
 	/*
 	if (EXTI->PR & EXTI_PR_PR1){
 		asm("nop");
 
 		EXTI->PR |= EXTI_PR_PR1; // unmasks the flag of the interrupt
-	}
-	*/
+	} */
+
 }
 
-
-/*
-void EXTI2_3_IRQHandler(void)
-{
-	delay(2);
-
-	if(EXTI->PR & EXTI_PR_PR2)
-	{
-		asm("nop");
-		if (GPIOA->IDR & GPIO_IDR_2)
-		{
-			GPIOB->ODR |= GPIO_ODR_3;
-		} else {
-			GPIOB->ODR &= ~GPIO_ODR_3;
-		}
-
-		EXTI->PR |= EXTI_PR_PR2; // unmasks the flag of the interrupt
-	}
-
-	if (EXTI->PR & EXTI_PR_PR3) {
-		asm("nop");
-
-		if (GPIOA->IDR & GPIO_IDR_3)
-		{
-			GPIOB->ODR |= GPIO_ODR_4;
-		} else {
-			GPIOB->ODR &= ~GPIO_ODR_4;
-		}
-
-		EXTI->PR |= EXTI_PR_PR3; // unmasks the flag of the interrupt
-	}
-
-	if(EXTI->PR & EXTI_PR_PR4)
-	{
-		asm("nop");
-		if (GPIOA->IDR & GPIO_IDR_4)
-		{
-			GPIOB->ODR |= GPIO_ODR_5;
-		} else {
-			GPIOB->ODR &= ~GPIO_ODR_5;
-		}
-
-		EXTI->PR |= EXTI_PR_PR4; // unmasks the flag of the interrupt
-	}
-
-	if (EXTI->PR & EXTI_PR_PR5) {
-		asm("nop");
-		if (GPIOA->IDR & GPIO_IDR_5)
-		{
-			GPIOB->ODR |= GPIO_ODR_6;
-		} else {
-			GPIOB->ODR &= ~GPIO_ODR_6;
-		}
-
-		EXTI->PR |= EXTI_PR_PR5; // unmasks the flag of the interrupt
-	}
-
-	if (EXTI->PR & EXTI_PR_PR6)
-	{
-		asm("nop");
-		if (GPIOA->IDR & GPIO_IDR_6)
-		{
-			GPIOB->ODR |= GPIO_ODR_7;
-		} else {
-			GPIOB->ODR &= ~GPIO_ODR_7;
-		}
-
-		EXTI->PR |= EXTI_PR_PR6; // unmasks the flag of the interrupt
-	}
-}
-
-void EXTI4_15_IRQHandler(void)
-{
-	delay(2);
-
-	if(EXTI->PR & EXTI_PR_PR2)
-	{
-		asm("nop");
-		if (GPIOA->IDR & GPIO_IDR_2)
-		{
-			GPIOB->ODR |= GPIO_ODR_3;
-		} else {
-			GPIOB->ODR &= ~GPIO_ODR_3;
-		}
-
-		EXTI->PR |= EXTI_PR_PR2; // unmasks the flag of the interrupt
-	}
-
-	if (EXTI->PR & EXTI_PR_PR3) {
-		asm("nop");
-
-		if (GPIOA->IDR & GPIO_IDR_3)
-		{
-			GPIOB->ODR |= GPIO_ODR_4;
-		} else {
-			GPIOB->ODR &= ~GPIO_ODR_4;
-		}
-
-		EXTI->PR |= EXTI_PR_PR3; // unmasks the flag of the interrupt
-	}
-
-	if(EXTI->PR & EXTI_PR_PR4)
-	{
-		asm("nop");
-		if (GPIOA->IDR & GPIO_IDR_4)
-		{
-			GPIOB->ODR |= GPIO_ODR_5;
-		} else {
-			GPIOB->ODR &= ~GPIO_ODR_5;
-		}
-
-		EXTI->PR |= EXTI_PR_PR4; // unmasks the flag of the interrupt
-	}
-
-	if (EXTI->PR & EXTI_PR_PR5) {
-		asm("nop");
-		if (GPIOA->IDR & GPIO_IDR_5)
-		{
-			GPIOB->ODR |= GPIO_ODR_6;
-		} else {
-			GPIOB->ODR &= ~GPIO_ODR_6;
-		}
-
-		EXTI->PR |= EXTI_PR_PR5; // unmasks the flag of the interrupt
-	}
-
-	if (EXTI->PR & EXTI_PR_PR6)
-	{
-		asm("nop");
-		if (GPIOA->IDR & GPIO_IDR_6)
-		{
-			GPIOB->ODR |= GPIO_ODR_7;
-		} else {
-			GPIOB->ODR &= ~GPIO_ODR_7;
-		}
-
-		EXTI->PR |= EXTI_PR_PR6; // unmasks the flag of the interrupt
-	}
-}
-*/
 
 // TEST
 void EXTI2_3_IRQHandler(void)
 {
 	delay(2);
-
 	if (GPIOA->IDR & GPIO_IDR_2)
 	{
+		//GPIOB->ODR |= GPIO_ODR_7;
 		sensors[4] = 1;
 	} else {
+		//GPIOB->ODR &= ~GPIO_ODR_7;
 		sensors[4] = 0;
 	}
 
 	EXTI->PR |= EXTI_PR_PR2; // unmasks the flag of the interrupt
-
+	delay(2);
 	if (GPIOA->IDR & GPIO_IDR_3)
 	{
+		//GPIOB->ODR |= GPIO_ODR_6;
 		sensors[3] = 1;
 	} else {
+		//GPIOB->ODR &= ~GPIO_ODR_6;
 		sensors[3] = 0;
 	}
 
 	EXTI->PR |= EXTI_PR_PR3; // unmasks the flag of the interrupt
-
+	delay(2);
 	if (GPIOA->IDR & GPIO_IDR_4)
 	{
+		//GPIOB->ODR |= GPIO_ODR_5;
 		sensors[2] = 1;
 	} else {
+		//GPIOB->ODR &= ~GPIO_ODR_5;
 		sensors[2] = 0;
 	}
 
 	EXTI->PR |= EXTI_PR_PR4; // unmasks the flag of the interrupt
-
+	delay(2);
 	if (GPIOA->IDR & GPIO_IDR_5)
 	{
+		//GPIOB->ODR |= GPIO_ODR_4;
 		sensors[1] = 1;
 	} else {
+		//GPIOB->ODR &= ~GPIO_ODR_4;
 		sensors[1] = 0;
 	}
 
 	EXTI->PR |= EXTI_PR_PR5; // unmasks the flag of the interrupt
-
+	delay(2);
 	if (GPIOA->IDR & GPIO_IDR_6)
 	{
+		//GPIOB->ODR |= GPIO_ODR_3;
 		sensors[0] = 1;
 	} else {
+		//GPIOB->ODR &= ~GPIO_ODR_3;
 		sensors[0] = 0;
 	}
 
@@ -344,52 +221,62 @@ void EXTI2_3_IRQHandler(void)
 void EXTI4_15_IRQHandler(void)
 {
 	delay(2);
-
 	if (GPIOA->IDR & GPIO_IDR_2)
 	{
+		//GPIOB->ODR |= GPIO_ODR_7;
 		sensors[4] = 1;
 	} else {
+		//GPIOB->ODR &= ~GPIO_ODR_7;
 		sensors[4] = 0;
 	}
 
 	EXTI->PR |= EXTI_PR_PR2; // unmasks the flag of the interrupt
-
+	delay(2);
 	if (GPIOA->IDR & GPIO_IDR_3)
 	{
+		//GPIOB->ODR |= GPIO_ODR_6;
 		sensors[3] = 1;
 	} else {
+		//GPIOB->ODR &= ~GPIO_ODR_6;
 		sensors[3] = 0;
 	}
 
 	EXTI->PR |= EXTI_PR_PR3; // unmasks the flag of the interrupt
-
+	delay(2);
 	if (GPIOA->IDR & GPIO_IDR_4)
 	{
+		//GPIOB->ODR |= GPIO_ODR_5;
 		sensors[2] = 1;
 	} else {
+		//GPIOB->ODR &= ~GPIO_ODR_5;
 		sensors[2] = 0;
 	}
 
 	EXTI->PR |= EXTI_PR_PR4; // unmasks the flag of the interrupt
-
+	delay(2);
 	if (GPIOA->IDR & GPIO_IDR_5)
 	{
+		//GPIOB->ODR |= GPIO_ODR_4;
 		sensors[1] = 1;
 	} else {
+		//GPIOB->ODR &= ~GPIO_ODR_4;
 		sensors[1] = 0;
 	}
 
 	EXTI->PR |= EXTI_PR_PR5; // unmasks the flag of the interrupt
-
+	delay(2);
 	if (GPIOA->IDR & GPIO_IDR_6)
 	{
+		//GPIOB->ODR |= GPIO_ODR_3;
 		sensors[0] = 1;
 	} else {
+		//GPIOB->ODR &= ~GPIO_ODR_3;
 		sensors[0] = 0;
 	}
 
 	EXTI->PR |= EXTI_PR_PR6; // unmasks the flag of the interrupt
 }
+
 
 
 // ***
@@ -399,8 +286,8 @@ void init_outputs()
     //Initialize the LED's to be used to output data
 
     RCC  ->AHBENR |= RCC_AHBENR_GPIOBEN;	// Connecting GPIO Port B to the clock through the bus using bit 18
-    GPIOB->MODER  |= 0x00001555;        // Setting modes of the PB[0-7] to outputs
-    // GPIOB->MODER  |= 0x00005555; // For testing purposes
+    // GPIOB->MODER  |= 0x00001555;        // Setting modes of the PB[0-7] to outputs
+    GPIOB->MODER  |= 0x00005555; // For testing purposes
 }
 
 /*

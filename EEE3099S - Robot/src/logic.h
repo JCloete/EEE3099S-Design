@@ -11,7 +11,7 @@
 // ******* Global Variables ********
 
 // This states whether a sensor is detecting something or not
-extern char sensors[5];
+extern int sensors[5];
 
 // Logic state robot is in
 extern char error;
@@ -34,6 +34,7 @@ void delay(int delay);
 
 void addInfo(char intersection, char turnTaken);
 void finish(void);
+void readSensors(void);
 
 // char equalArrays(char arr1, char arr2);
 

@@ -57,8 +57,79 @@ int main(void)
 	init_PWM();
 	stop();
 
+	/*
+	while(1)
+	{
+
+		//readSensors();
+		if(sensors[0])
+		{
+			GPIOB->ODR |= GPIO_ODR_3;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_3;
+		}
+		if (sensors[1])
+		{
+			GPIOB->ODR |= GPIO_ODR_4;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_4;
+		}
+		if (sensors[2])
+		{
+			GPIOB->ODR |= GPIO_ODR_5;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_5;
+		}
+		if (sensors[3])
+		{
+			GPIOB->ODR |= GPIO_ODR_6;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_6;
+		}
+		if (sensors[4])
+		{
+			GPIOB->ODR |= GPIO_ODR_7;
+		} else {
+			GPIOB->ODR &= ~GPIO_ODR_7;
+		}
+
+	}
+*/
 	while(finished);
-	// forward();
+	forward();
+
+	//while(1)
+	//{
+		/*
+		finished = 1;
+		while(finished);
+		stop();
+		finished = 1;
+		while(finished);
+		makeTurn(LEFT);
+		finished = 1;
+		while(finished);
+		stop();
+		finished = 1;
+		while(finished);
+		makeTurn(RIGHT);
+		finished = 1;
+		while(finished);
+		stop();
+		*/
+
+		/*
+		finished = 1;
+		while(finished);
+		correctPath(LEFT);
+		finished = 1;
+		while(finished);
+		correctPath(RIGHT);
+		finished = 1;
+		while(finished);
+		correctPath(STRAIGHT);
+		*/
+	//}
 
 	while (1)
 	{
@@ -84,4 +155,6 @@ int main(void)
 		}
 
 	}
+
+
 }

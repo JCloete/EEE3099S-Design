@@ -31,7 +31,7 @@
 #include "logic.h"
 #include "motor.h"
 
-char sensors[5] = {0, 0, 1, 0, 0};
+int sensors[5] = {0, 0, 1, 0, 0};
 
 // Logic state robot is in
 char error = 0; // Start with on correct path
@@ -89,7 +89,7 @@ void checkIntersection()
 	if (sensors[0] == 0 && sensors[1] == 0 && sensors[2] == 0 && sensors[3] == 0 && sensors[4] == 0)
 	{
 		addInfo(6, 4);
-		makeTurn(LEFT);
+		turnAround();
 	} else if (sensors[0] == 1 || sensors[4] == 1) {
 		// Check what kind of intersection
 		if (sensors[0] == 1 && sensors[4] == 1)
@@ -291,5 +291,24 @@ char equalArrays(char arr1, char arr2)
 	}
 
 	return 1;
+}
+*/
+/*
+void readSensors(void)
+{
+	sensors[0] = (GPIOA->IDR & GPIO_IDR_7);
+	delay(2);
+	sensors[1] = (GPIOA->IDR & GPIO_IDR_6);
+	delay(2);
+	sensors[2] = (GPIOA->IDR & GPIO_IDR_5);
+	delay(2);
+	//sensors[2] = (GPIOA->IDR & GPIO_IDR_4);
+	delay(2);
+	sensors[3] = (GPIOA->IDR & GPIO_IDR_3);
+	delay(2);
+	sensors[4] = (GPIOA->IDR & GPIO_IDR_2);
+	delay(2);
+	//sensors[5] = (GPIOA->IDR & GPIO_IDR_7);
+	//delay(2);
 }
 */
