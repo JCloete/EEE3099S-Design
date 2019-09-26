@@ -31,6 +31,9 @@ void forward(void)
 
 	GPIOB->ODR |= GPIO_ODR_5;
 	GPIOB->ODR &= ~GPIO_ODR_6;
+
+	TIM2->CCR3 = 100 * 40;
+	TIM2->CCR4 = 100 * 40;
 }
 
 // Use this for braking i think
@@ -62,20 +65,20 @@ void correctPath(char direction)
 	{
 	case LEFT:
 		// PWM Code to make it turn the robot left
-		TIM2->CCR3 = 40 * 80;
-		TIM2->CCR4 = 50 * 80;
+		TIM2->CCR3 = 0 * 40;
+		TIM2->CCR4 = 100 * 40;
 		break;
 
 	case STRAIGHT:
 		// PWM code to make it go straight
-		TIM2->CCR3 = 50 * 80;
-		TIM2->CCR4 = 50 * 80;
+		TIM2->CCR3 = 100 * 40;
+		TIM2->CCR4 = 100 * 40;
 		break;
 
 	case RIGHT:
 		// PWM code to make it go right
-		TIM2->CCR3 = 50 * 80;
-		TIM2->CCR4 = 40 * 80;
+		TIM2->CCR3 = 100 * 40;
+		TIM2->CCR4 = 0 * 40;
 		break;
 	}
 }
@@ -123,7 +126,7 @@ void turn(char direction)
 void turnAround(void)
 {
 	// Add in a command to turn robot 180 degrees then stop
-	turn(LEFT);
+	makeTurn(LEFT);
 	while(sensors[2] != 1);
 	stop();
 }

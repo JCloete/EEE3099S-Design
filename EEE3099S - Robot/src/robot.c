@@ -55,7 +55,7 @@ void run_ADC(void)
 // No idea how this code works. Figure it out sometime. Perhaps reuse this to make a flashing LED. The Timer interrupt part not the PWM
 void init_PWM(void)
 {
-	RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+	// RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
 	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
 	GPIOB->MODER |= GPIO_MODER_MODER10_1;
 	GPIOB->MODER |= GPIO_MODER_MODER11_1;
@@ -65,8 +65,8 @@ void init_PWM(void)
 	TIM2->ARR=4000;
 	TIM2->CCMR2 |= (TIM_CCMR2_OC3M_2|TIM_CCMR2_OC3M_1);
 	TIM2->CCMR2 |= (TIM_CCMR2_OC4M_2|TIM_CCMR2_OC4M_1);
-	TIM2->CCR3 = 50 * 80;
-	TIM2->CCR4 = 50 * 80;
+	TIM2->CCR3 = 100 * 40;
+	TIM2->CCR4 = 100 * 40;
 
 	TIM2->CCER |= TIM_CCER_CC3E;
 	TIM2->CCER |= TIM_CCER_CC4E;
@@ -161,7 +161,6 @@ void EXTI0_1_IRQHandler(void)
 // TEST
 void EXTI2_3_IRQHandler(void)
 {
-	delay(2);
 	if (GPIOA->IDR & GPIO_IDR_2)
 	{
 		//GPIOB->ODR |= GPIO_ODR_7;
@@ -172,7 +171,6 @@ void EXTI2_3_IRQHandler(void)
 	}
 
 	EXTI->PR |= EXTI_PR_PR2; // unmasks the flag of the interrupt
-	delay(2);
 	if (GPIOA->IDR & GPIO_IDR_3)
 	{
 		//GPIOB->ODR |= GPIO_ODR_6;
@@ -183,7 +181,7 @@ void EXTI2_3_IRQHandler(void)
 	}
 
 	EXTI->PR |= EXTI_PR_PR3; // unmasks the flag of the interrupt
-	delay(2);
+
 	if (GPIOA->IDR & GPIO_IDR_4)
 	{
 		//GPIOB->ODR |= GPIO_ODR_5;
@@ -194,7 +192,7 @@ void EXTI2_3_IRQHandler(void)
 	}
 
 	EXTI->PR |= EXTI_PR_PR4; // unmasks the flag of the interrupt
-	delay(2);
+
 	if (GPIOA->IDR & GPIO_IDR_5)
 	{
 		//GPIOB->ODR |= GPIO_ODR_4;
@@ -205,7 +203,7 @@ void EXTI2_3_IRQHandler(void)
 	}
 
 	EXTI->PR |= EXTI_PR_PR5; // unmasks the flag of the interrupt
-	delay(2);
+
 	if (GPIOA->IDR & GPIO_IDR_6)
 	{
 		//GPIOB->ODR |= GPIO_ODR_3;
@@ -220,7 +218,7 @@ void EXTI2_3_IRQHandler(void)
 
 void EXTI4_15_IRQHandler(void)
 {
-	delay(2);
+
 	if (GPIOA->IDR & GPIO_IDR_2)
 	{
 		//GPIOB->ODR |= GPIO_ODR_7;
@@ -231,7 +229,7 @@ void EXTI4_15_IRQHandler(void)
 	}
 
 	EXTI->PR |= EXTI_PR_PR2; // unmasks the flag of the interrupt
-	delay(2);
+
 	if (GPIOA->IDR & GPIO_IDR_3)
 	{
 		//GPIOB->ODR |= GPIO_ODR_6;
@@ -242,7 +240,7 @@ void EXTI4_15_IRQHandler(void)
 	}
 
 	EXTI->PR |= EXTI_PR_PR3; // unmasks the flag of the interrupt
-	delay(2);
+
 	if (GPIOA->IDR & GPIO_IDR_4)
 	{
 		//GPIOB->ODR |= GPIO_ODR_5;
@@ -253,7 +251,7 @@ void EXTI4_15_IRQHandler(void)
 	}
 
 	EXTI->PR |= EXTI_PR_PR4; // unmasks the flag of the interrupt
-	delay(2);
+
 	if (GPIOA->IDR & GPIO_IDR_5)
 	{
 		//GPIOB->ODR |= GPIO_ODR_4;
@@ -264,7 +262,7 @@ void EXTI4_15_IRQHandler(void)
 	}
 
 	EXTI->PR |= EXTI_PR_PR5; // unmasks the flag of the interrupt
-	delay(2);
+
 	if (GPIOA->IDR & GPIO_IDR_6)
 	{
 		//GPIOB->ODR |= GPIO_ODR_3;

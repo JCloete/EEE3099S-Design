@@ -31,7 +31,7 @@
 #include "logic.h"
 #include "motor.h"
 
-int sensors[5] = {0, 0, 1, 0, 0};
+char sensors[5] = {0, 0, 1, 0, 0};
 
 // Logic state robot is in
 char error = 0; // Start with on correct path
@@ -45,6 +45,7 @@ char turnNum = 0; // This gets incremented with each intersection discovered
 
 void followLine()
 {
+	delay(1);
 	GPIOB->ODR &= GPIO_ODR_0;
 	// This section keeps it following the line
 	// Smaller If statements inside check if its just a correction or turn
@@ -55,7 +56,19 @@ void followLine()
 	} else if (sensors[1] == 0 && sensors[3] == 1) {
 		if (sensors[4] == 1)
 		{
-			checkIntersection();
+			//checkIntersection();
+			stop();
+			delay(10);
+			forward();
+			delay(80);
+			stop();
+			if (sensors[2] == 1)
+			{
+				forward();
+				return;
+			}
+			makeTurn(RIGHT);
+			stop();
 			return;
 		} else {
 			error = RIGHT;
@@ -63,14 +76,32 @@ void followLine()
 	} else if (sensors[1] == 1 && sensors[3] == 0) {
 		if (sensors[0] == 1)
 		{
-			checkIntersection();
+			//checkIntersection();
+			stop();
+			delay(10);
+			forward();
+			delay(80);
+			stop();
+			makeTurn(LEFT);
+			stop();
 			return;
 		} else {
 			error = LEFT;
 		}
 	} else {
 		printf("DEAD END or T-Junction");
-		checkIntersection();
+		//checkIntersection();
+		stop();
+		delay(10);
+		forward();
+		delay(80);
+		stop();
+		if (sensors[0] == 1 && sensors[1] == 1 && sensors[2] == 1 && sensors[3] == 1 && sensors[3] == 1)
+		{
+			finished = 1;
+			return;
+		}
+		makeTurn(LEFT);
 		return;
 	}
 
@@ -79,7 +110,69 @@ void followLine()
 	makeCorrections(error); // Adds in what the error is for corrections to be made
 
 }
+/*
+void followLineHC(char turn)
+{
+	delay(1);
+	// This section keeps it following the line
+	// Smaller If statements inside check if its just a correction or turn
+	if (sensors[1] == 0 && sensors[2] == 1 && sensors[3] == 0)
+	{
+		forward();
+		return;
+	} else if (sensors[1] == 0 && sensors[3] == 1) {
+		if (sensors[4] == 1)
+		{
+			//checkIntersection();
+			stop();
+			delay(10);
+			forward();
+			delay(80);
+			stop();
+			makeTurn(RIGHT);
+			stop();
+			return;
+		} else {
+			error = RIGHT;
+		}
+	} else if (sensors[1] == 1 && sensors[3] == 0) {
+		if (sensors[0] == 1)
+		{
+			//checkIntersection();
+			stop();
+			delay(10);
+			forward();
+			delay(80);
+			stop();
+			makeTurn(LEFT);
+			stop();
+			return;
+		} else {
+			error = LEFT;
+		}
+	} else {
+		printf("DEAD END or T-Junction");
+		//checkIntersection();
+		stop();
+		delay(10);
+		forward();
+		delay(80);
+		stop();
+		if (sensors[0] == 1 && sensors[1] == 1 && sensors[2] == 1 && sensors[3] == 1 && sensors[3] == 1)
+		{
+			finished = 1;
+			return;
+		}
+		makeTurn(LEFT);
+		return;
+	}
 
+
+	// Add in a check for if the sensors are truly fucked up
+	makeCorrections(error); // Adds in what the error is for corrections to be made
+
+}
+*/
 void checkIntersection()
 {
 	GPIOB->ODR |= GPIO_ODR_0;
@@ -159,24 +252,27 @@ void checkIntersection()
 // Decides on what corrections to be made depending on error
 void makeCorrections(char error)
 {
-	delay(2);
-	if (error != pastError)
+	delay(1);
+	if (1)
 	{
 		switch (error)
 		{
 		case STRAIGHT:
 			pastError = STRAIGHT;
 			correctPath(STRAIGHT);
+			//turn(STRAIGHT);
 			break;
 
 		case LEFT:
 			pastError = LEFT;
 			correctPath(LEFT);
+			//turn(LEFT);
 			break;
 
 		case RIGHT:
 			pastError = RIGHT;
 			correctPath(RIGHT);
+			//turn(RIGHT);
 			break;
 
 		default:
@@ -193,23 +289,14 @@ void makeTurn(char direction)
 	switch (direction)
 	{
 	case 0:
-		//forward();
-		//delay(50);
-		//stop();
 		turn(LEFT);
 		break;
 
 	case 1:
-		//forward();
-		//delay(50);
-		//stop();
 		turn(STRAIGHT);
 		break;
 
 	case 2:
-		//forward();
-		//delay(50);
-		//stop();
 		turn(RIGHT);
 		break;
 
@@ -218,6 +305,7 @@ void makeTurn(char direction)
 		forward();
 	}
 
+	delay(50);
 	while(sensors[2] == 1); // Wait for the sensor to get off original path and move into transition mode (Otherwise below line executes immediately)
 	while(sensors[2] != 1); // Constantly check for if turn is completed
 	forward();

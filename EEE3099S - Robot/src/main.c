@@ -97,10 +97,10 @@ int main(void)
 */
 	while(finished);
 	forward();
+/*
+	while(1)
+	{
 
-	//while(1)
-	//{
-		/*
 		finished = 1;
 		while(finished);
 		stop();
@@ -116,9 +116,7 @@ int main(void)
 		finished = 1;
 		while(finished);
 		stop();
-		*/
 
-		/*
 		finished = 1;
 		while(finished);
 		correctPath(LEFT);
@@ -128,8 +126,8 @@ int main(void)
 		finished = 1;
 		while(finished);
 		correctPath(STRAIGHT);
+		}
 		*/
-	//}
 
 	while (1)
 	{
@@ -137,7 +135,7 @@ int main(void)
 		forward();
 
 		// Solving maze code
-		while(1)
+		while(!finished)
 		{
 			followLine();
 		}
@@ -149,9 +147,9 @@ int main(void)
 		while(finished)
 		{
 			GPIOB->ODR |= GPIO_ODR_0;
-			delay(50);
-			GPIOB->ODR &= ~GPIO_ODR_0;
-			delay(50);
+			//delay(50);
+			//GPIOB->ODR &= ~GPIO_ODR_0;
+			//delay(50);
 		}
 
 	}

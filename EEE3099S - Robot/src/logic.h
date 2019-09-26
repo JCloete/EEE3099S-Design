@@ -11,7 +11,7 @@
 // ******* Global Variables ********
 
 // This states whether a sensor is detecting something or not
-extern int sensors[5];
+extern char sensors[5];
 
 // Logic state robot is in
 extern char error;
